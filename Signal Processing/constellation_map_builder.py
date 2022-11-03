@@ -4,7 +4,7 @@ This file is in charge of building a constellation map given a pre-processed sig
 """
 
 def build_constellation_map(signal, fs):
-    """Builds a constellation mpa from a signal
+    """Builds a constellation map from a signal
 
      Parameters
      ----------
@@ -34,3 +34,4 @@ def build_constellation_map(signal, fs):
         [(1.235, 20),(1.235, 80),(2.7689, 45)]
 
      """
+    return []
