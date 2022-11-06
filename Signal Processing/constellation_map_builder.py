@@ -8,7 +8,7 @@ def build_constellation_map(signal, fs):
 
      Parameters
      ----------
-     signal : 1d float array
+     signal : 1d numpy float array
          Signal of sound in time domain.
      fs: float,
          Sampling frequency of the signal.
