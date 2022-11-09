@@ -43,6 +43,16 @@ class Note:
         return f"({self.name}:{self.frequency:.2f}): started at {self.start_time:.2f} for {self.played_time:.2f} " \
                f"seconds; ended at {self.end_time:.2f}"
 
+    def __repr__(self):
+        """
+        Developer-friendly version of the __str__ function
+
+        Returns
+        -------
+        A string with the features of a MIDI note, indexed by ":"
+        """
+        return f"{self.note}:{self.name}:{self.frequency:.2f}:{self.start_time:.2f}:{self.end_time:.2f}:{self.played_time:.2f}"
+
 
 def compute_seconds_elapsed(delta_ticks, ticks_per_beat, midi_tempo):
     """
@@ -89,6 +99,8 @@ def get_notes(file):
     'note_on' to a dictionary until its respective 'note_off' is found. When found, a note object is created and then
     removed from the dictionary. The note object is then added to the list of notes to be returned
 
+    In addition, a text file is created with the notes in string format
+
     Parameters
     ----------
     file : A MIDI file
@@ -117,7 +129,7 @@ def get_notes(file):
 
     for track in midi_file.tracks:
 
-        filtered_track = [x for x in track if not x.is_meta]
+        filtered_track = [x for x in track if not x.is_meta and (x.type == "note_on" or x.type == "note_off")]
         i = 0
 
         for msg in filtered_track:
@@ -152,4 +164,14 @@ def get_notes(file):
 
             i += 1
 
+    with open(file.replace(".mid", ".txt"), "w", encoding='utf-8') as f:
+
+        for midi_note in notes:
+            f.write(repr(midi_note))
+            f.write("\n")
+
     return notes
+
+
+# Testing
+# get_notes("../test_data/imagine_john_lennon_PIANO.mid")
