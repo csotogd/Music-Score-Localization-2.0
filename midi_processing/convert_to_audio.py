@@ -11,7 +11,7 @@ from midi2audio import FluidSynth
 from midi_utils import allowed_formats
 
 
-def run(file, output_file, sound_font="sound_font.sf2", sample_rate=22050):
+def run(file, output_format, sound_font="sound_font.sf2", sample_rate=44100):
     """
     This function converts the MIDI file to an audio file. It first checks if the file exists and is indeed a MIDI
     file. It then checks if the output file is of a valid format. The sound font and sample rate may be overriden.
@@ -20,7 +20,7 @@ def run(file, output_file, sound_font="sound_font.sf2", sample_rate=22050):
     Parameters
     ----------
     file : A string of the file to be converted
-    output_file : A string of the chosen name and format of the output audio file
+    output_format : A string for the format of the audio file (.wav, .mp3, etc.)
     sound_font : A sound font file (.sf2). The sound font of the audio,
                  i.e. how the audio must sound (guitar, piano, etc.)
     sample_rate : An integer indicating the number of samples of audio carried per second, measured in Hz
@@ -36,8 +36,10 @@ def run(file, output_file, sound_font="sound_font.sf2", sample_rate=22050):
     if not os.path.exists(file):
         raise Exception(f"{file} does not exist")
 
-    if format_allowed(allowed_formats, output_file):
+    if format_allowed(allowed_formats, output_format):
         print(f"Converting {file} to an audio file...")
+
+        output_file = file.replace(".mid", output_format)
 
         fs = FluidSynth(sound_font=sound_font, sample_rate=sample_rate)
         fs.midi_to_audio(file, output_file)
@@ -45,7 +47,7 @@ def run(file, output_file, sound_font="sound_font.sf2", sample_rate=22050):
         print(f"Done. Saved as {output_file}")
 
     else:
-        raise Exception(f"{output_file} is not an accepted audio format")
+        raise Exception(f"{output_format} is not an accepted audio format")
 
 
 def format_allowed(formats, output_file):
