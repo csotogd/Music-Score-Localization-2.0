@@ -53,6 +53,20 @@ class FIR_noise_filter(Noise_filter):
         y = sig.lfilter(b, a, signal)  # filter output using lfilter function
         return y[1:] #remove lefft padding
 
+    def filter_and_plot(self, signal, fs):
+
+        filtered_s = self.filter_noise(signal,fs)
+        n = len(signal)
+
+        #f = (np.array(range(0,n-1)) * fs) / n;
+        x=np.array(range(0,n))
+        plt.plot(x[1:], signal[1:])
+        plt.plot(x[1:], filtered_s)
+        plt.title("Noisy vs filtered")
+        # plt.legend("noisy", "filtered")
+
+        plt.show()
+
 
 class Wavelet_shink_filter(Noise_filter):
     """
@@ -78,7 +92,10 @@ if __name__ == '__main__':
     signal_no_noise = np.sin(x)
     noisy_signal = signal_no_noise + np.random.normal(0, 1, len(signal_no_noise))
 
+
     filter = FIR_noise_filter(length=20)
+    filter.filter_and_plot(noisy_signal, 100)
+    """
     filtered_s = filter.filter_noise(noisy_signal, 100)
 
     plt.plot(x[1:], noisy_signal[1:])
@@ -89,3 +106,4 @@ if __name__ == '__main__':
 
 
     plt.show()
+    """
