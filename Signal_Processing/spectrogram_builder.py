@@ -1,13 +1,13 @@
 from scipy import signal as sig
 import numpy as np
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmetho
 
 class Spectrogram_builder:
     """
     This class is an interface that defines a framework building Spectrograms
     """
 
-    @abstractmethod
+    #@abstractmethod
     def spectrogram(signal, fs):
         """
         Builds spectrogram from the inputted signal.
@@ -39,7 +39,8 @@ class Spectrogram_builder:
 class Wavelet_spectrogram(Spectrogram_builder):
     """Builds a spectrogram using wavelet transforms"""
     #TODO: probablly migrate to another file as this will be a large class
-    return "to be implemented"
+    def spectrogram(signal, fs):
+        return "to be implemented"
 
 class STFT(Spectrogram_builder):
     """Builds a spectrogram using wavelet STFT. It just calls the function in the library
@@ -47,3 +48,6 @@ class STFT(Spectrogram_builder):
 
     def spectrogram(signal, fs):
         return signal.spectrogram(signal, fs=fs, window=('tukey', 0.25), noverlap=20)
+
+if __name__ == '__main__':
+    noise_filter.FIR_noise_filter()
