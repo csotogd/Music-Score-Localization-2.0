@@ -9,3 +9,11 @@ def plot_signal(signal):
     x = np.array(range(0, n))
     plt.plot(x[1:], signal[1:])
     # plt.legend("noisy", "filtered")
+
+    """
+    time_to_plot = np.arange(Fs * 1, Fs * 1.3, dtype=int)
+    plt.plot(time_to_plot, song[time_to_plot])
+    plt.title("Sound Signal Over Time")
+    plt.xlabel("Time Index")
+    plt.ylabel("Magnitude")
+    """
