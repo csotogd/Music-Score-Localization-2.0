@@ -3,6 +3,9 @@ import wave
 import wavio
 import numpy as np
 from abc import  abstractmethod
+import multiprocessing
+import threading
+import time
 import sounddevice as sd
 from scipy.io.wavfile import write
 
@@ -22,8 +25,28 @@ def  read_segment(seconds):
 
 
 
+
+def do_something():
+    print('Sleeping 5 second')
+    time.sleep(5)
+    print('Done sleeping')
+
 if __name__ == '__main__':
     Parameters_IO.fs = 45000
-    read_segment(5)
+    read_segment(2)
+
+    start = time.perf_counter()
+
+    t1 = threading.Thread(target=do_something)
+    t2 = threading.Thread(target=read_segment, args=[5])
+
+    t1.start()
+    t2.start()
+
+    t1.join()
+    t2.join()
 
 
+
+    finish = time.perf_counter()
+    print(f'Finished in {round(finish - start, 2)} seconds')
