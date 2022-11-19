@@ -5,8 +5,7 @@ import numpy as np
 from abc import  abstractmethod
 
 class Parameters_IO:
-    seconds_per_segment = 3
-    non_overlap_seconds = 2 #number of seconds in each segment of new content
+
 
     sample_format = pyaudio.paInt16  # 16 bits per sample
     channels = 1 # is normally 2, one for each speaker, we set it to one as it would be quite complex otherwise.
@@ -15,53 +14,6 @@ class Parameters_IO:
     recorded_so_far =[]
     frames= []
 
-
-class Generator_segments_recorded:
-    """
-    When we are comparing our reference signal to an already recorded signal, this class is a generator for ther
-    recorded song sements, this is everytime we call next(), we will get a new song semment
-    """
-
-    def __init__(self, recorded_song):
-        self.recorded_song = recorded_song
-        self.length_secs_rec = len(recorded_song) / Parameters_IO.fs
-        self.start_id = -1
-        self.end_id = -1
-
-    def get_first_start_end_id(self):
-        """
-        Returns the start and the end id of the segment to be read from a reference song
-        """
-        start_segment_id = 0
-        end_segment_id = start_segment_id + (Parameters_IO.seconds_per_segment * Parameters_IO.fs)
-        if end_segment_id>= len(self.recorded_song):
-            end_segment_id= len(self.recorded_song)-1
-
-        return start_segment_id, end_segment_id
-
-    def next(self):
-        """
-
-        Returns
-        -------
-        The next song segment to proccess or None if there are no more song snippets to return
-        """
-
-        if self.start_id<0: #first song snippet
-            self.start_id, self.end_id = self.get_first_start_end_id()
-
-        elif self.end_id>= len(self.recorded_song)-1: #nothing else to read
-            return None
-
-
-        else:
-            self.start_id+= Parameters_IO.non_overlap_seconds*Parameters_IO.fs
-            self.end_id+= Parameters_IO.non_overlap_seconds*Parameters_IO.fs
-
-            if self.end_id >= len(self.recorded_song):
-                self.end_id = len(self.recorded_song) - 1
-
-        return self.recorded_song[self.start_id: self.end_id]
 
 
 
