@@ -16,13 +16,28 @@ class Parameters_IO:
 
 
 class Segment_reader:
+    """
+    Class in charge of reading subsequent sound bits (or segments) from the microhphone
+    """
     def __init__(self, total_seconds_to_record):
-        self.recorded_so_far = []
-        self.__seconds_recorded_so_far = 0
+        self.__recorded_so_far = []
+        #list of np arrayss where each np array correpsonds to a recording. They are ordered
+
+        self.seconds_recorded_so_far = 0
+        #nr of seconds that have been recorded so far
+
         self.total_seconds_to_record = total_seconds_to_record
+        #nr of seconds to record in total, lenght of recording
+
         self.last_read_segment = np.array([])
+        #last recorded segment
 
     def  read_segment(self, seconds):
+        """"
+        Reads #seconds from the mic and stores them as an np array in the
+        self parameter last_read_segment
+        """
+
         fs = Parameters_IO.fs
 
         myrecording = sd.rec(int(seconds * fs), samplerate=fs, channels=Parameters_IO.channels)
@@ -36,7 +51,7 @@ class Segment_reader:
         """"
         Returns a numpy array with the recorded signal so far up to now.
         """
-        return np.concatenate(self.recorded_so_far, axis=0)
+        return np.concatenate(self.__recorded_so_far, axis=0)
 
 
 def do_something():
