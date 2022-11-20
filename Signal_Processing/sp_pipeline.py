@@ -1,5 +1,6 @@
 from Signal_Processing.noise_filter import FIR_noise_filter
 from Signal_Processing.spectrogram_builder import STFT_spectrogram
+from Signal_Processing.constellation_map_builder import build_constellation_map
 
 
 def sp_pipeline(raw_signal, fs):
@@ -12,4 +13,6 @@ def sp_pipeline(raw_signal, fs):
     f, t, Zxx =spectr_builder.spectrogram_calculate_plot(denoised, fs)
 
     #constellation_map
-    #TODO
+    constellation_map = build_constellation_map(f, t, Zxx, fs)
+
+    return constellation_map

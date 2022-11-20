@@ -171,3 +171,7 @@ def get_notes(file):
             f.write("\n")
 
     return notes
+
+
+# Testing
+# get_notes("../data/imagine_john_lennon_PIANO.mid")
