@@ -30,9 +30,9 @@ def build_constellation_map(frequencies, times, stft, fs):
      -------
      list of tuples
         Constellation map representation. Each entry in our list corresponds to a peak,
-        and it is represented as a tuple with two entries. The first entry corresponds to the time.
+        and it is represented as a tuple with two entries. The first entry corresponds to the index of the time sample.
         The second entry corresponds to the frequency at which the peak happens.
-        The time is relative to the signal inputted to this function.
+        The time index is relative to the signal inputted to this function.
         The list of tuples is ordered in chronologically. In case of a tie in the time axis, they are ordered in
         ascending order based on frequency.
 
@@ -41,10 +41,16 @@ def build_constellation_map(frequencies, times, stft, fs):
 
         1.235 seconds at 80 Hz
         1.235 seconds at 20 Hz
-        2.7689 seconds at 45 Hz
+        2.769 seconds at 45 Hz
+
+        so their corresponding index, frequency tuples would be:
+
+        (1235, 20.0)
+        (1235, 80.0)
+        (2769, 45.0)
 
         Then the output will be:
-        [(1.235, 20),(1.235, 80),(2.7689, 45)]
+        [(1.235, 20),(1.235, 80),(2.769, 45)]
 
      """
     # Maximum number of peaks to retrieve in each window.
@@ -73,6 +79,7 @@ def build_constellation_map(frequencies, times, stft, fs):
         # remaining indexes. To retrieve the indexes of the n most prominent peaks we just retrieve the elements
         # corresponding to the indexes in the last n positions of the output of the argpartition.
         largest_peaks = np.argpartition(props["prominences"], -n_peaks)[-n_peaks:]
+        largest_peaks = np.flip(largest_peaks, axis=None)
         for peak in peaks[largest_peaks]:
             frequency = frequencies[peak]
             constellation_map.append([time_idx, frequency])

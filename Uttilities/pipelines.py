@@ -2,6 +2,7 @@ from Signal_Processing.noise_filter import FIR_noise_filter
 from Signal_Processing.spectrogram_builder import STFT_spectrogram
 from Uttilities.Generator_segments import Generator_segments_recorded
 from Signal_Processing.IO.Audio_IO import Parameters_IO
+from Signal_Processing.constellation_map_builder import build_constellation_map
 
 
 def ref_signal_pipeline(ref_song, secs_per_segment, non_overlap_seconds):
@@ -55,6 +56,5 @@ def sp_pipeline(raw_signal, fs, denoise=False):
     f, t, Zxx =spectr_builder.spectrogram(denoised, fs)
 
     #constellation_map
-    #TODO implement
-    constellation_map =[]
+    constellation_map = build_constellation_map(f, t, Zxx, fs)
     return  constellation_map
