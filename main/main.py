@@ -2,7 +2,7 @@ import multiprocessing
 import time
 import pyaudio
 import wave
-import wavio
+# import wavio
 
 from Signal_Processing.IO.Audio_reader import PyAudio_reader
 

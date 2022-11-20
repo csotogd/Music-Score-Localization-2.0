@@ -18,7 +18,7 @@ def build_constellation_map(frequencies, times, stft, fs):
      Parameters
      ----------
      frequencies: ndarray,
-        Array of sample frequencie.
+        Array of sample frequencies.
      times: ndarray,
         Array of segment times.
      stft: ndarray,
