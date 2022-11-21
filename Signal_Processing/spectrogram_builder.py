@@ -77,7 +77,7 @@ class STFT_spectrogram(Spectrogram_builder):
         #size of frequencies array output: H = nperseg - noverlap
         #the f array will have evenly spaced values form 0 to fs/2 where H is the interval between values
 
-        return f, t, Zxx #TODO Sree, If you have any questions about this, send me a text
+        return f, t, Zxx
 
     def spectrogram_calculate_plot(self, signal, fs):
         """

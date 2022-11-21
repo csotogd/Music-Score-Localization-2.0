@@ -20,7 +20,7 @@ if __name__ == '__main__':
     #now we focus on the signal that is recorded by the microphone. There are two posibilities:
     #we either have the song stored because it is a past recording and we need to load it or we
     #will record the sound in real time. This will be controlled by the variable from_mic
-    from_mic = True
+    from_mic = False
     path_to_recording = "../data/imagine_john_lennon_PIANO.wav"
     #since we have not recorded Diyon playing piano, we will match the signal with itself
 
@@ -78,7 +78,7 @@ if __name__ == '__main__':
         song_segment = generator_semnets.next()
         while song_segment is not None:
             plot_signal(song_segment)
-            sp_pipeline(song_segment, Parameters_IO.fs, denoise=True)
+            constellation_map = sp_pipeline(song_segment, Parameters_IO.fs, denoise=True)
             #TODO include matching algorithm here
             #here we would compare histograms
 
