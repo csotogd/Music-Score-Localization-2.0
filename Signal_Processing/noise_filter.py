@@ -2,6 +2,7 @@ from scipy import signal as sig
 import numpy as np
 from abc import ABC, abstractmethod
 import matplotlib.pyplot as plt
+import pywt
 
 class Noise_filter:
     """
@@ -71,9 +72,17 @@ class FIR_noise_filter(Noise_filter):
 class Wavelet_shink_filter(Noise_filter):
     """
     Subclass of Noise_filter which will perform noise filtering by using Wavelet shinkrage with soft thresholding
+
+    Denoising algorithm
+    The denoising steps are the following :
+
+    Apply the dwt to the signal
+    Compute the threshold corresponding to the chosen level
+    Only keep coefficients with a value higher than the threshold
+    Apply the inverse dwt to retrieve the signal
     """
 
-    def __init__(self, levels=3):
+    def __init__(self, levels=2):
         """
          Parameters
          ----------
@@ -82,19 +91,37 @@ class Wavelet_shink_filter(Noise_filter):
         """
         self.levels = levels
 
-    def filter_noise(self, signal, fs):
-        return "to be implemented"
+    def __madev(self, d, axis=None):
+        """ Mean absolute deviation of a signal """
+        return np.mean(np.absolute(d - np.mean(d, axis)), axis)
+
+    def __wavelet_denoising(self, x, wavelet='db4', level=1):
+        coeff = pywt.wavedec(x, wavelet, mode="per")
+        sigma = (1 / 0.6745) * self.__madev(coeff[-level])
+        uthresh = sigma * np.sqrt(2 * np.log(len(x)))
+        coeff[1:] = (pywt.threshold(i, value=uthresh, mode='hard') for i in coeff[1:])
+        return pywt.waverec(coeff, wavelet, mode='per')
+
+    def filter_noise(self, signal):
+        return self.__wavelet_denoising(signal, level=self.levels)
 
 if __name__ == '__main__':
+
+    
 
     #test_visual_testing.  Other tests in test suite class
     x = np.linspace(4 * -np.pi, 4 * np.pi, 501)
     signal_no_noise = np.sin(x)
     noisy_signal = signal_no_noise + np.random.normal(0, 1, len(signal_no_noise))
 
+    denoiser= Wavelet_shink_filter(levels=2)
 
-    filter = FIR_noise_filter(length=20)
-    filter.filter_and_plot(noisy_signal, 100)
+    denoised = denoiser.filter_noise(noisy_signal)
+    plt.plot(noisy_signal)
+    plt.plot(denoised)
+    plt.show()
+    #filter = FIR_noise_filter(length=20)
+    #filter.filter_and_plot(noisy_signal, 100)
     """
     filtered_s = filter.filter_noise(noisy_signal, 100)
 
