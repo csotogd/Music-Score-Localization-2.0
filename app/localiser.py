@@ -4,6 +4,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.core.window import Window
 from kivy.uix.relativelayout import RelativeLayout
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import ScreenManager, Screen, SlideTransition
 
 import os
@@ -39,7 +40,7 @@ class BackButton(Button):
         super(BackButton, self).__init__(**kwargs)
 
         self.background_color = [1, 1, 1, 1]
-        self.size_hint = (0.1, 0.1)
+        self.size_hint = (0.1/50, 0.1)
         self.text = "Back"
 
         self.screen_instance = screen_instance
@@ -55,13 +56,16 @@ class MidiButton(Button):
         super(MidiButton, self).__init__(**kwargs)
 
         self.background_color = [1, 1, 1, 1]
-        self.size_hint = (0.1, 0.1)
+        self.size_hint = (0.1/50, 0.1)
         self.pos = (pos_x, pos_y)
         self.text = name
-        self.padding = (10, 10)
+        self.padding = (100, 10)
 
     def on_press(self):
-        self.background_color = [0, 1, 0, 1] if self.background_color == [1, 1, 1, 1] else [1, 1, 1, 1]
+        self.background_color = [0, 1, 0, 1]
+
+    def on_release(self):
+        self.background_color = [1, 1, 1, 1]
 
 
 class Home(Screen):
@@ -84,6 +88,21 @@ class Home(Screen):
         self.add_widget(screen)
 
 
+class MidiLayout(RelativeLayout):
+
+    def __init__(self, **kwargs):
+        super(MidiLayout, self).__init__(**kwargs)
+
+        self.size = (Window.width, Window.height)
+
+        pass
+
+    def on_touch_down(self, touch):
+        if touch.is_double_tap:
+            # TODO: Animation goes here
+            pass
+
+
 class MidiSheet(Screen):
 
     def __init__(self, **kwargs):
@@ -91,14 +110,14 @@ class MidiSheet(Screen):
 
         screen = ScrollView(size=(Window.width, Window.height), do_scroll_x=True, do_scroll_y=False)
 
-        notes = get_notes_in_song("../data/" + self.name)
+        self.notes = get_notes_in_song("../data/" + self.name)
 
-        layout = RelativeLayout(size=(Window.width, Window.height))
+        layout = RelativeLayout(size_hint=(50, 1))
         layout.add_widget(BackButton(self))
 
         initial_y_pos = Window.height/2
         initial_x_pos = Window.width*0.1
-        for note in notes:
+        for note in self.notes:
             note_name = note.split(":")[1]
 
             layout.add_widget(MidiButton(note_name, initial_x_pos, initial_y_pos))
@@ -113,11 +132,11 @@ class MidiSheet(Screen):
 class Localiser(App):
 
     def build(self):
+
         sm = ScreenManager(transition=SlideTransition())
         sm.add_widget(Home(name="home"))
 
         return sm
-
 
 
 
