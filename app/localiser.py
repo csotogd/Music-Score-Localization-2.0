@@ -4,8 +4,11 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.core.window import Window
 from kivy.uix.relativelayout import RelativeLayout
-from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.screenmanager import ScreenManager, Screen, SlideTransition
+from kivy.animation import Animation
+from kivy.effects.scroll import ScrollEffect
+
+from midi_processing.midi_to_notes import Note
 
 import os
 
@@ -40,7 +43,8 @@ class BackButton(Button):
         super(BackButton, self).__init__(**kwargs)
 
         self.background_color = [1, 1, 1, 1]
-        self.size_hint = (0.1/50, 0.1)
+        self.size_hint = (None, None)
+        self.size = (100, 50)
         self.text = "Back"
 
         self.screen_instance = screen_instance
@@ -52,14 +56,21 @@ class BackButton(Button):
 
 
 class MidiButton(Button):
-    def __init__(self, name, pos_x, pos_y, **kwargs):
+    def __init__(self, midi_note, **kwargs):
         super(MidiButton, self).__init__(**kwargs)
 
         self.background_color = [1, 1, 1, 1]
-        self.size_hint = (0.1/50, 0.1)
-        self.pos = (pos_x, pos_y)
-        self.text = name
+        self.size_hint = (None, None)
+
+        self.size = (100 * midi_note.played_time, 50)
+
+        self.pos = (200, Window.height/2)
+        self.text = midi_note.name
         self.padding = (100, 10)
+
+        self.start_time = midi_note.start_time
+        self.end_time = midi_note.end_time
+        self.played_time = midi_note.played_time
 
     def on_press(self):
         self.background_color = [0, 1, 0, 1]
@@ -90,17 +101,20 @@ class Home(Screen):
 
 class MidiLayout(RelativeLayout):
 
-    def __init__(self, **kwargs):
+    def __init__(self, midi_buttons, **kwargs):
         super(MidiLayout, self).__init__(**kwargs)
 
-        self.size = (Window.width, Window.height)
+        self.size_hint = (None, None)
 
-        pass
+        self.size = ((midi_buttons[-1].end_time + 1) * 100, Window.height)
 
-    def on_touch_down(self, touch):
-        if touch.is_double_tap:
-            # TODO: Animation goes here
-            pass
+        for button in midi_buttons:
+            self.add_widget(button)
+
+    # def on_touch_down(self, touch):
+    #     if touch.is_double_tap:
+    #         scroll = ScrollEffect()
+    #         scroll.start(-self.window_width)
 
 
 class MidiSheet(Screen):
@@ -108,22 +122,20 @@ class MidiSheet(Screen):
     def __init__(self, **kwargs):
         super(MidiSheet, self).__init__(**kwargs)
 
-        screen = ScrollView(size=(Window.width, Window.height), do_scroll_x=True, do_scroll_y=False)
+        screen = ScrollView(size_hint=(None, None), size=(Window.width, Window.height), do_scroll_x=True, do_scroll_y=False)
 
         self.notes = get_notes_in_song("../data/" + self.name)
 
-        layout = RelativeLayout(size_hint=(50, 1))
-        layout.add_widget(BackButton(self))
+        self.midi_buttons = []
 
-        initial_y_pos = Window.height/2
-        initial_x_pos = Window.width*0.1
         for note in self.notes:
-            note_name = note.split(":")[1]
+            strings = note.split(":")
+            midi_note = Note(int(strings[0]), float(strings[3]), float(strings[4]), float(strings[5]))
+            self.midi_buttons.append(MidiButton(midi_note))
 
-            layout.add_widget(MidiButton(note_name, initial_x_pos, initial_y_pos))
+        layout = MidiLayout(self.midi_buttons)
 
-            initial_x_pos += 100
-
+        layout.add_widget(BackButton(self))
         screen.add_widget(layout)
 
         self.add_widget(screen)

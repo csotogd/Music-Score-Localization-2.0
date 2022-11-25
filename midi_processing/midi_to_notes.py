@@ -5,7 +5,7 @@ https://github.com/mido/mido
 
 import mido as m
 import os
-from midi_utils import tempo, note_to_name, compute_frequency
+from midi_processing.midi_utils import tempo, note_to_name, compute_frequency
 
 
 class Note:
