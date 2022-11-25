@@ -56,7 +56,7 @@ class BackButton(Button):
 
 
 class MidiButton(Button):
-    def __init__(self, midi_note, **kwargs):
+    def __init__(self, midi_note, first_note, total_duration, **kwargs):
         super(MidiButton, self).__init__(**kwargs)
 
         self.background_color = [1, 1, 1, 1]
@@ -64,9 +64,9 @@ class MidiButton(Button):
 
         self.size = (100 * midi_note.played_time, 50)
 
-        self.pos = (200, Window.height/2)
+        self.pos = (50 + (midi_note.start_time/total_duration)*((total_duration + 1)*100), ((first_note - midi_note.note)/Window.height) + Window.height/2)
         self.text = midi_note.name
-        self.padding = (100, 10)
+        self.padding = (10, 10)
 
         self.start_time = midi_note.start_time
         self.end_time = midi_note.end_time
@@ -126,12 +126,15 @@ class MidiSheet(Screen):
 
         self.notes = get_notes_in_song("../data/" + self.name)
 
+        first_note = int(self.notes[0].split(":")[0])
+        total_duration = float(self.notes[-1].split(":")[4])
+
         self.midi_buttons = []
 
         for note in self.notes:
             strings = note.split(":")
             midi_note = Note(int(strings[0]), float(strings[3]), float(strings[4]), float(strings[5]))
-            self.midi_buttons.append(MidiButton(midi_note))
+            self.midi_buttons.append(MidiButton(midi_note, first_note, total_duration))
 
         layout = MidiLayout(self.midi_buttons)
 
