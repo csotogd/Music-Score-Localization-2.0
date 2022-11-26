@@ -118,9 +118,6 @@ def get_notes(file):
 
     notes = []
 
-    # Keeps track of MIDI notes whose 'note_off' is to be found
-    note_holder = {}
-
     # clip=True just in case we end up opening a file with notes over 127 velocity (volume),
     # the maximum for a note in a MIDI file
     midi_file = m.MidiFile(file, clip=True)
@@ -129,11 +126,16 @@ def get_notes(file):
 
     for track in midi_file.tracks:
 
+        # Keeps track of MIDI notes whose 'note_off' is to be found
+        note_holder = {}
+
         filtered_track = [x for x in track if not x.is_meta and (x.type == "note_on" or x.type == "note_off")]
         i = 0
 
-        for msg in filtered_track:
+        print(filtered_track)
 
+        for msg in filtered_track:
+            # TODO get note on, search for its note off - create note
             note = msg.note
 
             if msg.type == "note_on":
@@ -147,7 +149,11 @@ def get_notes(file):
                     start_time = compute_seconds_elapsed(msg.time, ticks_per_beat, tempo) + \
                                  compute_seconds_elapsed(get_delta_ticks_since(filtered_track[:i]), ticks_per_beat, tempo)
 
-                note_holder[note] = start_time
+                if note not in note_holder:
+                    note_holder[note] = start_time
+
+                print(f"added {note}")
+                print(note_holder)
 
             if msg.type == "note_off":
 
@@ -156,10 +162,14 @@ def get_notes(file):
 
                 # There cannot be a note_off without a note_on, so we can be sure that the key will exist. No need
                 # to handle key not found exceptions
+
+                print(f"searching for {note}")
+                print(note_holder)
                 played_time = end_time - note_holder[note]
 
                 notes.append(Note(note, note_holder[note], end_time, played_time))
 
+                print(f"removing {note}")
                 note_holder.pop(note)
 
             i += 1
@@ -171,3 +181,6 @@ def get_notes(file):
             f.write("\n")
 
     return notes
+
+
+get_notes("../data/Clair_de_Lune.mid")
