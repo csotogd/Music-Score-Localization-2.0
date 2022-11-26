@@ -2,7 +2,7 @@ import numpy as np
 from constants import *
 
 
-def match(sample_tuples_array: list, song_tuples_array: list):
+def match(sample_tuples_array: np.ndarray, song_tuples_array: np.ndarray):
     """
     A function which compares the sample tuple array with the song
     tuple array by sliding the first over the second and counting

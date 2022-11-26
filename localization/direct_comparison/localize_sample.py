@@ -2,7 +2,7 @@ from create_tuples import create_tuples
 from match import match
 
 
-def localize_sample(sample_constellation_map, song_constellation_map):
+def localize_sample(sample_constellation_map: list, song_constellation_map: list):
     """
     A function to perform sample localization. The function first
     creates the tuple arrays from the sample and the song constellation

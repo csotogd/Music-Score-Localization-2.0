@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def create_tuples(constellation_map):
+def create_tuples(constellation_map: list):
     """
     A function that creates an array containing the tuples
     representing the diagonals in the constellation map.
