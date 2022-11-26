@@ -1,6 +1,6 @@
 import random
-from localize_snippet import localize_snippet
-from create_hashes import create_hashes
+from localization.localize_snippet import localize_snippet
+from localization.create_hashes import create_hashes
 import cProfile, pstats, io
 from pstats import SortKey
 import time

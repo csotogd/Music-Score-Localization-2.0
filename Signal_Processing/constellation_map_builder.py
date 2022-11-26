@@ -45,12 +45,12 @@ def build_constellation_map(frequencies, times, stft, fs):
 
         so their corresponding index, frequency tuples would be:
 
-        (1235, 20.0)
-        (1235, 80.0)
-        (2769, 45.0)
+        (1.235 * Fs, 20.0)
+        (1.235 * Fs, 80.0)
+        (2.769 *  Fs, 45.0)
 
         Then the output will be:
-        [(1.235, 20),(1.235, 80),(2.769, 45)]
+        [(1.235 * Fs, 20),(1.235 * Fs, 80),(2.769 * Fs, 45)]
 
      """
     # Maximum number of peaks to retrieve in each window.

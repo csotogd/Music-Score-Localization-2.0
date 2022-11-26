@@ -57,4 +57,5 @@ def sp_pipeline(raw_signal, fs, denoise=False):
 
     #constellation_map
     constellation_map = build_constellation_map(f, t, Zxx, fs)
+    print(constellation_map)
     return  constellation_map
