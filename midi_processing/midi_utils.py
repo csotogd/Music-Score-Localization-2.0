@@ -7,7 +7,7 @@ allowed_formats = [".mp3", ".wav", ".flac"]
 """
 The beats per minute of the song
 """
-bpm = 79
+bpm = 120
 
 """
 Computes the tempo of the MIDI file depending on the bpm

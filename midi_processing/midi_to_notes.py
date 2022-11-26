@@ -2,10 +2,11 @@
 This file gets the notes played from a MIDI file. In order to work, it requires the mido library to get MIDI data:
 https://github.com/mido/mido
 """
+import sys
 
 import mido as m
 import os
-from midi_utils import tempo, note_to_name, compute_frequency
+from midi_processing.midi_utils import tempo, note_to_name, compute_frequency
 
 
 class Note:
@@ -118,9 +119,6 @@ def get_notes(file):
 
     notes = []
 
-    # Keeps track of MIDI notes whose 'note_off' is to be found
-    note_holder = {}
-
     # clip=True just in case we end up opening a file with notes over 127 velocity (volume),
     # the maximum for a note in a MIDI file
     midi_file = m.MidiFile(file, clip=True)
@@ -130,8 +128,8 @@ def get_notes(file):
     for track in midi_file.tracks:
 
         filtered_track = [x for x in track if not x.is_meta and (x.type == "note_on" or x.type == "note_off")]
-        i = 0
 
+        i = 0
         for msg in filtered_track:
 
             note = msg.note
@@ -147,20 +145,26 @@ def get_notes(file):
                     start_time = compute_seconds_elapsed(msg.time, ticks_per_beat, tempo) + \
                                  compute_seconds_elapsed(get_delta_ticks_since(filtered_track[:i]), ticks_per_beat, tempo)
 
-                note_holder[note] = start_time
+                # Searches 15 notes ahead, and breaks when it finds the corresponding note_off
+                next_messages = filtered_track[i+1: i+15]
 
-            if msg.type == "note_off":
+                j = 1
+                for next_message in next_messages:
 
-                end_time = compute_seconds_elapsed(msg.time, ticks_per_beat, tempo) + \
-                           compute_seconds_elapsed(get_delta_ticks_since(filtered_track[:i]), ticks_per_beat, tempo)
+                    next_note = next_message.note
 
-                # There cannot be a note_off without a note_on, so we can be sure that the key will exist. No need
-                # to handle key not found exceptions
-                played_time = end_time - note_holder[note]
+                    if next_message.type == "note_off" and next_note == note:
 
-                notes.append(Note(note, note_holder[note], end_time, played_time))
+                        end_time = compute_seconds_elapsed(msg.time, ticks_per_beat, tempo) + \
+                                   compute_seconds_elapsed(get_delta_ticks_since(filtered_track[:i+1+j]), ticks_per_beat,
+                                                           tempo)
 
-                note_holder.pop(note)
+                        played_time = end_time - start_time
+
+                        notes.append(Note(note, start_time, end_time, played_time))
+                        break
+
+                    j += 1
 
             i += 1
 

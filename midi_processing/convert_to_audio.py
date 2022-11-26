@@ -8,7 +8,7 @@ import os
 import re
 
 from midi2audio import FluidSynth
-from midi_utils import allowed_formats
+from midi_processing.midi_utils import allowed_formats
 
 
 def run(file, output_format, sound_font="sound_font.sf2", sample_rate=44100):
