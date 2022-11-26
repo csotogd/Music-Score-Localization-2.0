@@ -2,6 +2,7 @@
 This file gets the notes played from a MIDI file. In order to work, it requires the mido library to get MIDI data:
 https://github.com/mido/mido
 """
+import sys
 
 import mido as m
 import os
@@ -126,16 +127,11 @@ def get_notes(file):
 
     for track in midi_file.tracks:
 
-        # Keeps track of MIDI notes whose 'note_off' is to be found
-        note_holder = {}
-
         filtered_track = [x for x in track if not x.is_meta and (x.type == "note_on" or x.type == "note_off")]
+
         i = 0
-
-        print(filtered_track)
-
         for msg in filtered_track:
-            # TODO get note on, search for its note off - create note
+
             note = msg.note
 
             if msg.type == "note_on":
@@ -149,28 +145,26 @@ def get_notes(file):
                     start_time = compute_seconds_elapsed(msg.time, ticks_per_beat, tempo) + \
                                  compute_seconds_elapsed(get_delta_ticks_since(filtered_track[:i]), ticks_per_beat, tempo)
 
-                if note not in note_holder:
-                    note_holder[note] = start_time
+                # Searches 15 notes ahead, and breaks when it finds the corresponding note_off
+                next_messages = filtered_track[i+1: i+15]
 
-                print(f"added {note}")
-                print(note_holder)
+                j = 1
+                for next_message in next_messages:
 
-            if msg.type == "note_off":
+                    next_note = next_message.note
 
-                end_time = compute_seconds_elapsed(msg.time, ticks_per_beat, tempo) + \
-                           compute_seconds_elapsed(get_delta_ticks_since(filtered_track[:i]), ticks_per_beat, tempo)
+                    if next_message.type == "note_off" and next_note == note:
 
-                # There cannot be a note_off without a note_on, so we can be sure that the key will exist. No need
-                # to handle key not found exceptions
+                        end_time = compute_seconds_elapsed(msg.time, ticks_per_beat, tempo) + \
+                                   compute_seconds_elapsed(get_delta_ticks_since(filtered_track[:i+1+j]), ticks_per_beat,
+                                                           tempo)
 
-                print(f"searching for {note}")
-                print(note_holder)
-                played_time = end_time - note_holder[note]
+                        played_time = end_time - start_time
 
-                notes.append(Note(note, note_holder[note], end_time, played_time))
+                        notes.append(Note(note, start_time, end_time, played_time))
+                        break
 
-                print(f"removing {note}")
-                note_holder.pop(note)
+                    j += 1
 
             i += 1
 
@@ -181,6 +175,3 @@ def get_notes(file):
             f.write("\n")
 
     return notes
-
-
-get_notes("../data/Clair_de_Lune.mid")

@@ -235,7 +235,7 @@ class MidiLayout(RelativeLayout):
     def __init__(self, midi_buttons, **kwargs):
         """
         Constructor for the MidiLayout. The width of this layout will be proportional to the duration of a song.
-        2 seconds are added as a buffer for the width
+        10 seconds are added as a buffer for the width
 
         Parameters
         ----------
@@ -246,7 +246,7 @@ class MidiLayout(RelativeLayout):
 
         self.size_hint = (None, None)
 
-        self.size = ((midi_buttons[-1].end_time + 2) * button_width, Window.height)
+        self.size = ((midi_buttons[-1].end_time + 10) * button_width, Window.height)
 
         for button in midi_buttons:
             self.add_widget(button)
@@ -292,8 +292,19 @@ class MidiSheet(Screen):
 
 
 class Localiser(App):
+    """
+    Class for the localiser app
+    """
 
     def build(self):
+        """
+        Builds the app. Before doing so, it checks if the midi files have their corresponding .wav and .txt files - if
+        not, it will create them
+
+        Returns
+        -------
+        A screen manager object, containing the home screen
+        """
 
         for file in os.listdir(data_folder):
 
@@ -305,7 +316,10 @@ class Localiser(App):
                 if os.path.exists(data_folder+txt_file) and os.path.exists(data_folder+wav_file):
                     continue
 
+                # Convert to audio
                 run(data_folder+file, ".wav", sound_font="../sound_fonts/Roland_SC-55.sf2")
+
+                # Create .txt file with notes
                 get_notes(data_folder+file)
 
         sm = ScreenManager(transition=SlideTransition())
