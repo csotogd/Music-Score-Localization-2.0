@@ -1,0 +1,33 @@
+import numpy as np
+from constants import *
+
+
+def match(sample_tuples_array: list, song_tuples_array: list):
+    """
+    A function which compares the sample tuple array with the song
+    tuple array by sliding the first over the second and counting
+    the total number of matches (within a threshold as defined by the
+    RANGES constant). The function returns:
+        - the indices at which the maximum number of matches were found;
+        - the number of matches divided by the length or the sample tuple array.
+    """
+
+    sample_len = len(sample_tuples_array)
+    song_len = len(song_tuples_array)
+    max_score = 0
+    indices = []
+    for i in range(song_len - sample_len):
+        score = np.sum(
+            np.all(
+                np.abs(sample_tuples_array - song_tuples_array[i : i + sample_len])
+                < RANGES,
+                axis=1,
+            )
+        )
+        if score > max_score:
+            max_score = score
+            indices = [i]
+        elif score == max_score:
+            indices.append(i)
+
+    return indices, max_score / sample_len
