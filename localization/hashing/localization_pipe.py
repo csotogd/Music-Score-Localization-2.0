@@ -1,6 +1,6 @@
-from localization.create_hashes import create_hashes
-from localization.match import match
-from localization.localize_snippet import localize_snippet
+from localization.hashing.create_hashes import create_hashes
+from localization.hashing.match import match
+from localization.hashing.localize_snippet import localize_snippet
 import time
 
 
