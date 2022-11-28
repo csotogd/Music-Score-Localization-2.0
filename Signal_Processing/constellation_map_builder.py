@@ -37,7 +37,7 @@ def build_constellation_map(frequencies, times, stft, fs):
         ascending order based on frequency.
 
         As an example. We have a signal of 3000 observations sampled at 1000Hz.
-        Hence, we have a 3 seconds long snippet. The constellation map has peaks in points:
+        Hence, we have a 3 seconds long snippet. The constellation map has peaks at points:
 
         1.235 seconds at 80 Hz
         1.235 seconds at 20 Hz
@@ -82,6 +82,6 @@ def build_constellation_map(frequencies, times, stft, fs):
         largest_peaks = np.flip(largest_peaks, axis=None)
         for peak in peaks[largest_peaks]:
             frequency = frequencies[peak]
-            constellation_map.append([time_idx, frequency])
+            constellation_map.append([times[time_idx]*fs, frequency])
 
     return constellation_map
