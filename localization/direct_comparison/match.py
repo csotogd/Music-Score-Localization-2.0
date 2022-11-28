@@ -1,5 +1,8 @@
 import numpy as np
-from constants import *
+
+# A constant that defines the thresholds for comparing two tuples of the form
+# (freq_0, freq_1, td) to account for frequency and time distortion.
+RANGES = np.array((2, 2, 1))
 
 
 def match(sample_tuples_array: np.ndarray, song_tuples_array: np.ndarray):
