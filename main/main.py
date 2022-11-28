@@ -100,7 +100,6 @@ if __name__ == '__main__':
                                       time_ahead= 20, sample_freq= Parameters_IO.fs)
 
 
-                print(match_time)
 
                 song_segment = generator_semnets.next()
                 count+=1

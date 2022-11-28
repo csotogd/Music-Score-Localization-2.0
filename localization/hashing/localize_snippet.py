@@ -22,5 +22,5 @@ def localize_snippet(matches, sample_freq):
             max_matches = matches[time]
             match_time = time
 
-    '''match_time is multiplied by the sample_freq to get an actual time measure in seconds and then returned'''
-    return match_time * sample_freq
+    '''match_time is divided by the sample_freq to get an actual time measure in seconds and then returned'''
+    return match_time / sample_freq

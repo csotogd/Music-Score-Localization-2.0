@@ -30,10 +30,11 @@ def localization_pipeline(song_constellation_map, snippet_constellation_map, tim
 
     snippet_hashes = create_hashes(snippet_constellation_map, time_ahead)
 
+    #how many matches per time instance as a dicitonary
     matches = match(snippet_hashes, song_hashes)
 
     match_time = localize_snippet(matches, sample_freq)
-
+    print('match found with second: ', match_time)
     return match_time
 
 if __name__ == "__main__":
