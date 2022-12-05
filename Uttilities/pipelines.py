@@ -3,6 +3,7 @@ from Signal_Processing.spectrogram_builder import STFT_spectrogram
 from Uttilities.Generator_segments import Generator_segments_recorded
 from Signal_Processing.IO.Audio_IO import Parameters_IO
 from Signal_Processing.constellation_map_builder import build_constellation_map
+from Signal_Processing.sp_pipeline import sp_pipeline
 
 
 def ref_signal_pipeline(ref_song, secs_per_segment, non_overlap_seconds):
@@ -42,20 +43,5 @@ def ref_signal_pipeline(ref_song, secs_per_segment, non_overlap_seconds):
     return segments_map_time
 
 def sp_pipeline(raw_signal, fs, denoise=False):
-    #denoised
-    if denoise:
-        filter = FIR_noise_filter(length=20)
-        denoised = filter.filter_noise(raw_signal, fs)
-    else:
-        #the reference song does not have to be denoised
-        denoised = raw_signal
 
-    #spectrogram
-    spectr_builder = STFT_spectrogram()
-    #spectr_builder.spectrogram_calculate_plot(denoised, fs)
-    f, t, Zxx =spectr_builder.spectrogram(denoised, fs)
-
-    #constellation_map
-    constellation_map = build_constellation_map(f, t, Zxx, fs)
-    print(constellation_map)
-    return  constellation_map
+    return  sp_pipeline(raw_signal, fs, denoise)
