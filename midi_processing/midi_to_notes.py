@@ -96,9 +96,8 @@ def get_delta_ticks_since(midi_messages):
 def get_notes(file):
 
     """
-    Gets all the played notes in a MIDI file. This function iterates through the non-meta MIDI messages and adds each
-    'note_on' to a dictionary until its respective 'note_off' is found. When found, a note object is created and then
-    removed from the dictionary. The note object is then added to the list of notes to be returned
+    Gets all the played notes in a MIDI file. This function iterates through the non-meta MIDI messages and for each
+    'note_on', it will find its corresponding 'note_off' and add it to the list of played notes
 
     In addition, a text file is created with the notes in string format
 
@@ -146,9 +145,9 @@ def get_notes(file):
                                  compute_seconds_elapsed(get_delta_ticks_since(filtered_track[:i]), ticks_per_beat, tempo)
 
                 # Searches 15 notes ahead, and breaks when it finds the corresponding note_off
-                next_messages = filtered_track[i+1: i+15]
+                next_messages = filtered_track[i+1:]
 
-                j = 1
+                j = 0
                 for next_message in next_messages:
 
                     next_note = next_message.note
@@ -158,7 +157,8 @@ def get_notes(file):
                         end_time = compute_seconds_elapsed(msg.time, ticks_per_beat, tempo) + \
                                    compute_seconds_elapsed(get_delta_ticks_since(filtered_track[:i+1+j]), ticks_per_beat,
                                                            tempo)
-
+                        print("end time")
+                        print(end_time)
                         played_time = end_time - start_time
 
                         notes.append(Note(note, start_time, end_time, played_time))
@@ -175,3 +175,7 @@ def get_notes(file):
             f.write("\n")
 
     return notes
+
+
+#print(m.MidiFile("../data/The_ballad_of_john_and_yoko_BASS.mid"))
+get_notes("../data/The_ballad_of_john_and_yoko_BASS.mid")
