@@ -4,6 +4,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.core.window import Window
 from kivy.uix.relativelayout import RelativeLayout
+from kivy.uix.label import Label
 from kivy.uix.screenmanager import ScreenManager, Screen, SlideTransition
 
 from midi_processing.midi_to_notes import Note, get_notes
@@ -16,7 +17,7 @@ import os
 Standard button sizes (in pixels)
 """
 button_width = 100
-button_height = 50
+button_height = 25
 
 data_folder = "../data/"
 
@@ -227,6 +228,19 @@ class Home(Screen):
         self.add_widget(screen)
 
 
+class Timeline(Button):
+
+    def __init__(self, x, string, **kwargs):
+        super(Timeline, self).__init__(**kwargs)
+
+        self.background_color = [0, 0, 0, 0]
+        self.size_hint = (None, None)
+        self.size = (button_width, button_height)
+        self.pos = (x, Window.height - button_height)
+
+        self.text = string
+
+
 class MidiLayout(RelativeLayout):
     """
     Class for the MidiLayout. This layout will display all the MIDI notes in a song
@@ -247,6 +261,17 @@ class MidiLayout(RelativeLayout):
         self.size_hint = (None, None)
 
         self.size = ((midi_buttons[-1].end_time + 10) * button_width, Window.height)
+
+        pixel_step = button_width
+
+        seconds = 0
+
+        for i in range(int(midi_buttons[-1].end_time) + 10):
+            string = f" {int(seconds/60)}:{seconds%60} " if i % 5 == 0 else " | "
+
+            self.add_widget(Timeline(i * pixel_step, string))
+
+            seconds += 1
 
         for button in midi_buttons:
             self.add_widget(button)
@@ -313,14 +338,13 @@ class Localiser(App):
                 txt_file = file.replace(".mid", ".txt")
                 wav_file = file.replace(".mid", ".wav")
 
-                if os.path.exists(data_folder+txt_file) and os.path.exists(data_folder+wav_file):
-                    continue
+                if not os.path.exists(data_folder+txt_file):
+                    # Create .txt file with notes
+                    get_notes(data_folder + file)
 
-                # Convert to audio
-                run(data_folder+file, ".wav", sound_font="../sound_fonts/Roland_SC-55.sf2")
-
-                # Create .txt file with notes
-                get_notes(data_folder+file)
+                if not os.path.exists(data_folder+wav_file):
+                    # Convert to audio
+                    run(data_folder+file, ".wav", sound_font="../sound_fonts/Roland_SC-55.sf2")
 
         sm = ScreenManager(transition=SlideTransition())
         sm.add_widget(Home(name="home"))
