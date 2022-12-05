@@ -121,13 +121,15 @@ def get_notes(file):
     # clip=True just in case we end up opening a file with notes over 127 velocity (volume),
     # the maximum for a note in a MIDI file
     midi_file = m.MidiFile(file, clip=True)
-
     ticks_per_beat = midi_file.ticks_per_beat
 
     for track in midi_file.tracks:
 
-        filtered_track = [x for x in track if not x.is_meta and (x.type == "note_on" or x.type == "note_off")]
+        tempo_msgs = [x for x in track if x.is_meta and x.type == "set_tempo"]
 
+        actual_tempo = tempo if len(tempo_msgs) == 0 else tempo_msgs[0].tempo
+
+        filtered_track = [x for x in track if not x.is_meta and (x.type == "note_on" or x.type == "note_off")]
         i = 0
         for msg in filtered_track:
 
@@ -137,14 +139,14 @@ def get_notes(file):
 
                 # If it's the first note, then there are no other notes preceding it to be taken into account
                 if i == 0:
-                    start_time = compute_seconds_elapsed(msg.time, ticks_per_beat, tempo)
+                    start_time = compute_seconds_elapsed(msg.time, ticks_per_beat, actual_tempo)
 
                 else:
 
-                    start_time = compute_seconds_elapsed(msg.time, ticks_per_beat, tempo) + \
-                                 compute_seconds_elapsed(get_delta_ticks_since(filtered_track[:i]), ticks_per_beat, tempo)
+                    start_time = compute_seconds_elapsed(msg.time, ticks_per_beat, actual_tempo) + \
+                                 compute_seconds_elapsed(get_delta_ticks_since(filtered_track[:i]), ticks_per_beat, actual_tempo)
 
-                # Searches 15 notes ahead, and breaks when it finds the corresponding note_off
+                # Searches notes ahead, and breaks when it finds the corresponding note_off
                 next_messages = filtered_track[i+1:]
 
                 j = 0
@@ -154,18 +156,15 @@ def get_notes(file):
 
                     if next_message.type == "note_off" and next_note == note:
 
-                        end_time = compute_seconds_elapsed(msg.time, ticks_per_beat, tempo) + \
-                                   compute_seconds_elapsed(get_delta_ticks_since(filtered_track[:i+1+j]), ticks_per_beat,
-                                                           tempo)
-                        print("end time")
-                        print(end_time)
+                        end_time = compute_seconds_elapsed(next_message.time, ticks_per_beat, actual_tempo) + \
+                                   compute_seconds_elapsed(get_delta_ticks_since(filtered_track[:i+j+1]), ticks_per_beat, actual_tempo)
+
                         played_time = end_time - start_time
 
                         notes.append(Note(note, start_time, end_time, played_time))
                         break
 
                     j += 1
-
             i += 1
 
     with open(file.replace(".mid", ".txt"), "w", encoding='utf-8') as f:
@@ -175,7 +174,3 @@ def get_notes(file):
             f.write("\n")
 
     return notes
-
-
-#print(m.MidiFile("../data/The_ballad_of_john_and_yoko_BASS.mid"))
-get_notes("../data/The_ballad_of_john_and_yoko_BASS.mid")
