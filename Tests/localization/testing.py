@@ -24,16 +24,15 @@ SAMPLE_LENGTH = 100
 NOISE_VAR = 3
 
 
-def test_loc(method, song_wav_path=None, recording_wav_path=None, random=False):
-    if random:
-        (
-            song_constellation_map,
-            sample_constellation_map,
-            idx,
-            origin,
-        ) = random_constellations(
-            song_length=SONG_LENGTH, sample_length=SAMPLE_LENGTH, noise_var=NOISE_VAR
-        )
+def test_random(method):
+    (
+        song_constellation_map,
+        sample_constellation_map,
+        idx,
+        origin,
+    ) = random_constellations(
+        song_length=SONG_LENGTH, sample_length=SAMPLE_LENGTH, noise_var=NOISE_VAR
+    )
 
     print()
     print("Match testing")
@@ -62,4 +61,4 @@ def test_loc(method, song_wav_path=None, recording_wav_path=None, random=False):
 
 
 if __name__ == "__main__":
-    test_loc(method=localize_sample_sh, random=True)
+    test_random(method=localize_sample_sh)
