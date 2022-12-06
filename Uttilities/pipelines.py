@@ -3,7 +3,7 @@ from Signal_Processing.spectrogram_builder import STFT_spectrogram
 from Uttilities.Generator_segments import Generator_segments_recorded
 from Signal_Processing.IO.Audio_IO import Parameters_IO
 from Signal_Processing.constellation_map_builder import build_constellation_map
-from Signal_Processing.sp_pipeline import sp_pipeline
+import Signal_Processing.sp_pipeline as sp
 
 
 def ref_signal_pipeline(ref_song, secs_per_segment, non_overlap_seconds):
@@ -19,8 +19,8 @@ def ref_signal_pipeline(ref_song, secs_per_segment, non_overlap_seconds):
 
     Returns
     -------
-        A list of tuples which is tuple is the contellation map and times of one segment.
-        Imagine we partition the referene song in 10 segments, then the returned list will havae 10 elements, each of them
+        A list of tuples which is tuple is the constellation map and times of one segment.
+        Imagine we partition the reference song in 10 segments, then the returned list will havae 10 elements, each of them
         being the constellation map and (start, end time) of each segment
 
     """
@@ -44,4 +44,4 @@ def ref_signal_pipeline(ref_song, secs_per_segment, non_overlap_seconds):
 
 def sp_pipeline(raw_signal, fs, denoise=False):
 
-    return  sp_pipeline(raw_signal, fs, denoise)
+    return sp.sp_pipeline(raw_signal, fs, denoise)
