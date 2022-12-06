@@ -102,7 +102,7 @@ class Wavelet_shink_filter(Noise_filter):
         coeff[1:] = (pywt.threshold(i, value=uthresh, mode='hard') for i in coeff[1:])
         return pywt.waverec(coeff, wavelet, mode='per')
 
-    def filter_noise(self, signal):
+    def filter_noise(self, signal, fs):
         return self.__wavelet_denoising(signal, level=self.levels)
 
 if __name__ == '__main__':
@@ -116,7 +116,7 @@ if __name__ == '__main__':
 
     denoiser= Wavelet_shink_filter(levels=2)
 
-    denoised = denoiser.filter_noise(noisy_signal)
+    denoised = denoiser.filter_noise(noisy_signal, fs = 'not necesary just here for completness')
     plt.plot(noisy_signal)
     plt.plot(denoised)
     plt.show()

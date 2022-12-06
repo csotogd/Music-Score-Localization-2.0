@@ -6,7 +6,7 @@ from Signal_Processing.constellation_map_builder import build_constellation_map
 import Signal_Processing.sp_pipeline as sp
 
 
-def ref_signal_pipeline(ref_song, secs_per_segment, non_overlap_seconds):
+def ref_signal_pipeline(ref_song, secs_per_segment, non_overlap_seconds, fs):
     """
     Parameters
     ----------
@@ -34,7 +34,7 @@ def ref_signal_pipeline(ref_song, secs_per_segment, non_overlap_seconds):
 
     while song_segment is not None:
         #we generate segments and apply the signal proccesing pipeline to it
-        constellation_map = sp_pipeline(song_segment, Parameters_IO.fs, denoise=False)
+        constellation_map = sp_pipeline(song_segment, fs, denoise=False)
         segments_map_time.append((constellation_map, times))
 
         song_segment = generator_semnets.next()

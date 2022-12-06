@@ -9,7 +9,7 @@ import threading
 
 from localization.localization_pipe import localization_pipeline
 
-app_testing = True
+app_testing = False
 
 if __name__ == "__main__":
 

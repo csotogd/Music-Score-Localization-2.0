@@ -1,4 +1,4 @@
-from Signal_Processing.noise_filter import FIR_noise_filter
+from Signal_Processing.noise_filter import FIR_noise_filter, Wavelet_shink_filter
 from Signal_Processing.spectrogram_builder import STFT_spectrogram
 from Signal_Processing.constellation_map_builder import build_constellation_map
 
@@ -6,7 +6,8 @@ from Signal_Processing.constellation_map_builder import build_constellation_map
 def sp_pipeline(raw_signal, fs, denoise=False):
     #denoised
     if denoise:
-        filter = FIR_noise_filter(length=20)
+        #filter = FIR_noise_filter(length=20)
+        filter = Wavelet_shink_filter(levels = 2)
         denoised = filter.filter_noise(raw_signal, fs)
     else:
         #the reference song does not have to be denoised
