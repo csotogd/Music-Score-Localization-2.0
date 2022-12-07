@@ -73,7 +73,7 @@ class STFT_spectrogram(Spectrogram_builder):
              STFT of x. By default, the last axis of Zxx corresponds to the segment times. Non normalized
 
         """
-        f, t, Zxx = sig.stft(signal, fs=fs, window='hann',noverlap=100, nperseg=500)
+        f, t, Zxx = sig.stft(signal, fs=fs, window='hann',noverlap=None, nperseg=2004)
         #size of frequencies array output: H = nperseg - noverlap
         #the f array will have evenly spaced values form 0 to fs/2 where H is the interval between values
 

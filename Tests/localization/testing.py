@@ -19,12 +19,12 @@ from constellations_from_wav_paths import constellations_from_wav_paths
 import time
 
 # Constants for random testing
-SONG_LENGTH = 10_000
-SAMPLE_LENGTH = 100
+SONG_LENGTH = 132_300 # 220_500, 441_000
+SAMPLE_LENGTH = 2004 # 35, 125, 501, 2004, 3371
 NOISE_VAR = 3
 
 
-def test_random(method):
+def random_test(method):
     (
         song_constellation_map,
         sample_constellation_map,
@@ -61,4 +61,4 @@ def test_random(method):
 
 
 if __name__ == "__main__":
-    test_random(method=localize_sample_sh)
+    random_test(method=localize_sample_sh)
