@@ -187,29 +187,32 @@ def get_labeled_data(path_to_file):
 if __name__ == "__main__":
 
     Fs_ref, ref_song = read(
-        "../data/bach_prelude_c_major/Bach_prelude_original_1channel.wav"
+        "../data/Clair_de_lune_original_1channel.wav"
+        # "../data/bach_prelude_c_major/Bach_prelude_original_1channel.wav"
     )
 
     # paths to songs we will compare
     path1_rec = (
-        "../data/bach_prelude_c_major/mic/Bach_prelude_first_version_1channel.wav"
+        "../data/claire_de_lune_record1_kris_1channel.wav"
     )
-    path2_rec = (
-        "../data/bach_prelude_c_major/mic/Bach_prelude_second_version_1channel.wav"
-    )
-    path3_rec = "../data/bach_prelude_c_major/mic/BAch_prelude_Background_plus_mistake_1_channel.wav"
+    #path1_rec = ("../data/bach_prelude_c_major/mic/Bach_prelude_first_version_1channel.wav")
+    # path2_rec = (
+    #    "../data/bach_prelude_c_major/mic/Bach_prelude_second_version_1channel.wav"
+    # )
+    # path3_rec = "../data/bach_prelude_c_major/mic/BAch_prelude_Background_plus_mistake_1_channel.wav"
 
     # paths to labeled data of songs
-    path1_labels = "../data/labelled_data/Bach_prelude_first_version_1channel.txt"
-    path2_labels = "../data/labelled_data/Bach_prelude_second_version_1channel.txt"
-    path3_labels = (
-        "../data/labelled_data/BAch_prelude_Background_plus_mistake_1_channel.txt"
-    )
+    path1_labels = "../data/claire_de_lune_record1_kris.txt"
+    # path1_labels = ../data/labelled_data/Bach_prelude_first_version_1channel.txt
+    # path2_labels = "../data/labelled_data/Bach_prelude_second_version_1channel.txt"
+    # path3_labels = (
+    #    "../data/labelled_data/BAch_prelude_Background_plus_mistake_1_channel.txt"
+    # )
 
     paths = [
         (path1_rec, path1_labels),
-        (path2_rec, path2_labels),
-        (path3_rec, path3_labels),
+        # (path2_rec, path2_labels),
+        # (path3_rec, path3_labels),
     ]
     length_snippets_in_secs = [3, 5, 10]
     scores = []
@@ -232,7 +235,7 @@ if __name__ == "__main__":
             )
             scores.append(score)
 
-    names = ["first version", "second version", "third version"]
+    names = ["first version"]#, "second version", "third version"]
     print()
     print()
     print()
