@@ -1,5 +1,12 @@
+# Append root to path
+import sys
+import os
+
+sys.path.append(os.getcwd())
+
+
 from Uttilities.pipelines import *
-from localization.localization_pipe import localization_pipeline
+from localization.sliding_hashes.localize_sample_sh import localize_sample_sh
 from scipy.io.wavfile import read
 
 """
@@ -15,7 +22,7 @@ def evaluate(
     Parameters
     ----------
     raw_ref: np array of the reference song, before any processing
-    raw_recording: np array of the recording, before any proccesing
+    raw_recording: np array of the recording, before any processing
     recording_labels: data structure to be defined
             This stores our (X,Y), where the X represents a time point (in seconds)
             in the recorded song, and the Y represent the time at which that bit appears.
@@ -39,30 +46,26 @@ def evaluate(
         )
         constellation_record = sp_pipeline(recording_interval, fs_record, denoise=True)
 
-        # use shazam algorithm to localize snippet:
-        prediction = localization_pipeline(
-            constellation_ref,
-            constellation_record,
-            time_ahead=10,
-            sample_freq=fs_record,
-        )  # MUST be the recording Fs and not the reference one
+        predictions, _ = localize_sample_sh(
+            constellation_record, constellation_ref, fs_record
+        )
 
-        score_point = evaluate_localization_one_point(true_label, prediction)
+        score_point = evaluate_localization(true_label, predictions)
         score += score_point
 
     score_normalized = score / len(recording_labels)
     return score_normalized
 
 
-def evaluate_localization_one_point(
+def evaluate_localization(
     true_label,
-    prediction,
+    predictions,
     interval_side_perfect_length=1,
-    interval_side_relevant_lenght=2,
+    interval_side_relevant_length=2,
 ):
     """
 
-    This functions evaluate how good/bad our estimated lozalization for one point is. the returned score lies between 0 and 1
+    This functions evaluate how good/bad our estimated localization for one point is. the returned score lies between 0 and 1
 
     More specifically this function works as follows:
 
@@ -75,7 +78,7 @@ def evaluate_localization_one_point(
 
     -   The score will be 0 everywhere else
 
-    Here is a draqwing of how a score looks like
+    Here is a drawing of how a score looks like
 
     1                       -------------------
     .                      /                     \
@@ -94,7 +97,7 @@ def evaluate_localization_one_point(
 
     Parameters
     ----------
-    true_label: float which represents the time in seconds of the ideal match. (our grouond truth)
+    true_label: float which represents the time in seconds of the ideal match. (our ground truth)
     prediction: float which represents the time in seconds of the predicted time at which the localization happens
                 according to our localization algorithm
 
@@ -102,35 +105,45 @@ def evaluate_localization_one_point(
     -------
     float, score of our match, must be between 0 and 1
     """
+    scores = []
+    for prediction in predictions:
+        if (
+            true_label - interval_side_perfect_length
+            <= prediction
+            <= true_label + interval_side_perfect_length
+        ):
+            scores.append(1)
 
-    if (prediction >= true_label - interval_side_perfect_length) and (
-        prediction <= true_label + interval_side_perfect_length
-    ):
-        return 1
+        elif (
+            true_label - interval_side_perfect_length - interval_side_relevant_length
+            <= prediction
+            <= true_label - interval_side_perfect_length
+        ):
+            distance_from_0_score = prediction - (
+                true_label
+                - interval_side_perfect_length
+                - interval_side_relevant_length
+            )
+            score = distance_from_0_score / interval_side_relevant_length
+            scores.append(score)
 
-    elif (prediction <= true_label - interval_side_perfect_length) and (
-        prediction
-        >= true_label - interval_side_perfect_length - interval_side_relevant_lenght
-    ):
-        distance_from_0_score = prediction - (
-            true_label - interval_side_perfect_length - interval_side_relevant_lenght
-        )
-        score = distance_from_0_score / interval_side_relevant_lenght
-        return score
+        elif (
+            true_label + interval_side_perfect_length
+            <= prediction
+            <= true_label + interval_side_perfect_length + interval_side_relevant_length
+        ):
+            distance_from_0_score = (
+                true_label
+                + interval_side_perfect_length
+                + interval_side_relevant_length
+            ) - prediction
+            score = distance_from_0_score / interval_side_relevant_length
+            scores.append(score)
 
-    elif (prediction >= true_label + interval_side_perfect_length) and (
-        prediction
-        <= true_label + interval_side_perfect_length + interval_side_relevant_lenght
-    ):
-        distance_from_0_score = (
-            true_label + interval_side_perfect_length + interval_side_relevant_lenght
-        ) - prediction
-        score = distance_from_0_score / interval_side_relevant_lenght
-        return score
+        else:
+            scores.append(0)
 
-    else:
-        return 0
-    return "a score"
+    return max(scores)
 
 
 def get_song_interval(raw_recording, time_recording, fs, length_sec=3):
@@ -177,8 +190,8 @@ def get_labeled_data(path_to_file):
 
     # Strips the newline character
     for line in Lines:
-        splited_string = line.split(":")
-        point = (float(splited_string[0]), float(splited_string[1].split("\n")[0]))
+        split_string = line.split(":")
+        point = (float(split_string[0]), float(split_string[1].split("\n")[0]))
         labeled_list.append(point)
 
     return labeled_list
@@ -187,23 +200,19 @@ def get_labeled_data(path_to_file):
 if __name__ == "__main__":
 
     Fs_ref, ref_song = read(
-        "../data/bach_prelude_c_major/Bach_prelude_original_1channel.wav"
+        "data/bach_prelude_c_major/Bach_prelude_original_1channel.wav"
     )
 
     # paths to songs we will compare
-    path1_rec = (
-        "../data/bach_prelude_c_major/mic/Bach_prelude_first_version_1channel.wav"
-    )
-    path2_rec = (
-        "../data/bach_prelude_c_major/mic/Bach_prelude_second_version_1channel.wav"
-    )
-    path3_rec = "../data/bach_prelude_c_major/mic/BAch_prelude_Background_plus_mistake_1_channel.wav"
+    path1_rec = "data/bach_prelude_c_major/mic/Bach_prelude_first_version_1channel.wav"
+    path2_rec = "data/bach_prelude_c_major/mic/Bach_prelude_second_version_1channel.wav"
+    path3_rec = "data/bach_prelude_c_major/mic/BAch_prelude_Background_plus_mistake_1_channel.wav"
 
     # paths to labeled data of songs
-    path1_labels = "../data/labelled_data/Bach_prelude_first_version_1channel.txt"
-    path2_labels = "../data/labelled_data/Bach_prelude_second_version_1channel.txt"
+    path1_labels = "data/labelled_data/Bach_prelude_first_version_1channel.txt"
+    path2_labels = "data/labelled_data/Bach_prelude_second_version_1channel.txt"
     path3_labels = (
-        "../data/labelled_data/BAch_prelude_Background_plus_mistake_1_channel.txt"
+        "data/labelled_data/BAch_prelude_Background_plus_mistake_1_channel.txt"
     )
 
     paths = [

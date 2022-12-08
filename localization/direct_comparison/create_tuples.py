@@ -23,11 +23,7 @@ def create_tuples(constellation_map: list):
     arr_ind = 0
     for i, (t_0, freq_0) in enumerate(constellation_map):
         for t_1, freq_1 in constellation_map[i : i + 10]:
-
             td = t_1 - t_0
-
-            if td < 1 or td > 10:
-                continue
 
             tuples_list.append((freq_0, freq_1, td))
             index_dict[arr_ind] = t_0
