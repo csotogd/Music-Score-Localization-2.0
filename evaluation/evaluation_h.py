@@ -1,12 +1,5 @@
-# Append root to path
-import sys
-import os
-
-sys.path.append(os.getcwd())
-
-
 from Uttilities.pipelines import *
-from localization.sliding_hashes.localize_sample_sh import localize_sample_sh
+from localization.hashing.localization_pipe import localization_pipeline
 from scipy.io.wavfile import read
 
 """
@@ -15,7 +8,7 @@ This file handles the evaluation of our method.
 
 
 def evaluate(
-    raw_ref, fs_ref, raw_recording, fs_record, recording_labels, length_snippet_secs=10
+    raw_ref, fs_ref, raw_recording, fs_record, recording_labels, length_snippet_secs=3
 ):
     """
 
@@ -46,7 +39,13 @@ def evaluate(
         )
         constellation_record = sp_pipeline(recording_interval, fs_record, denoise=True)
 
-        prediction = localize_sample_sh(constellation_record, constellation_ref, fs_record)[0][0]
+        # use shazam algorithm to localize snippet:
+        prediction = localization_pipeline(
+            constellation_ref,
+            constellation_record,
+            time_ahead=10,
+            sample_freq=fs_record,
+        )  # MUST be the recording Fs and not the reference one
 
         score_point = evaluate_localization_one_point(true_label, prediction)
         score += score_point
@@ -59,11 +58,11 @@ def evaluate_localization_one_point(
     true_label,
     prediction,
     interval_side_perfect_length=1,
-    interval_side_relevant_lenght=2,
+    interval_side_relevant_length=2,
 ):
     """
 
-    This functions evaluate how good/bad our estimated lozalization for one point is. the returned score lies between 0 and 1
+    This functions evaluate how good/bad our estimated localization for one point is. the returned score lies between 0 and 1
 
     More specifically this function works as follows:
 
@@ -95,7 +94,7 @@ def evaluate_localization_one_point(
 
     Parameters
     ----------
-    true_label: float which represents the time in seconds of the ideal match. (our grouond truth)
+    true_label: float which represents the time in seconds of the ideal match. (our ground truth)
     prediction: float which represents the time in seconds of the predicted time at which the localization happens
                 according to our localization algorithm
 
@@ -111,22 +110,22 @@ def evaluate_localization_one_point(
 
     elif (prediction <= true_label - interval_side_perfect_length) and (
         prediction
-        >= true_label - interval_side_perfect_length - interval_side_relevant_lenght
+        >= true_label - interval_side_perfect_length - interval_side_relevant_length
     ):
         distance_from_0_score = prediction - (
-            true_label - interval_side_perfect_length - interval_side_relevant_lenght
+            true_label - interval_side_perfect_length - interval_side_relevant_length
         )
-        score = distance_from_0_score / interval_side_relevant_lenght
+        score = distance_from_0_score / interval_side_relevant_length
         return score
 
     elif (prediction >= true_label + interval_side_perfect_length) and (
         prediction
-        <= true_label + interval_side_perfect_length + interval_side_relevant_lenght
+        <= true_label + interval_side_perfect_length + interval_side_relevant_length
     ):
         distance_from_0_score = (
-            true_label + interval_side_perfect_length + interval_side_relevant_lenght
+            true_label + interval_side_perfect_length + interval_side_relevant_length
         ) - prediction
-        score = distance_from_0_score / interval_side_relevant_lenght
+        score = distance_from_0_score / interval_side_relevant_length
         return score
 
     else:
@@ -178,8 +177,8 @@ def get_labeled_data(path_to_file):
 
     # Strips the newline character
     for line in Lines:
-        splited_string = line.split(":")
-        point = (float(splited_string[0]), float(splited_string[1].split("\n")[0]))
+        split_string = line.split(":")
+        point = (float(split_string[0]), float(split_string[1].split("\n")[0]))
         labeled_list.append(point)
 
     return labeled_list
@@ -196,7 +195,7 @@ if __name__ == "__main__":
     path1_rec = (
         "../data/claire_de_lune_record1_kris_1channel.wav"
     )
-    # path1_rec = ("../data/bach_prelude_c_major/mic/Bach_prelude_first_version_1channel.wav")
+    #path1_rec = ("../data/bach_prelude_c_major/mic/Bach_prelude_first_version_1channel.wav")
     # path2_rec = (
     #    "../data/bach_prelude_c_major/mic/Bach_prelude_second_version_1channel.wav"
     # )
@@ -212,11 +211,9 @@ if __name__ == "__main__":
 
     paths = [
         (path1_rec, path1_labels),
-        #(path2_rec, path2_labels),
-        #(path3_rec, path3_labels),
+        # (path2_rec, path2_labels),
+        # (path3_rec, path3_labels),
     ]
-
-
     length_snippets_in_secs = [3, 5, 10]
     scores = []
 
@@ -238,7 +235,7 @@ if __name__ == "__main__":
             )
             scores.append(score)
 
-    names = ["first version"] #, "second version", "third version"]
+    names = ["first version"]#, "second version", "third version"]
     print()
     print()
     print()

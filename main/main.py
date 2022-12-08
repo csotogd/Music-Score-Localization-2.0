@@ -7,7 +7,7 @@ from Signal_Processing.IO.Audio_IO import Segment_reader
 
 import threading
 
-from localization.localization_pipe import localization_pipeline
+from localization.hashing.localization_pipe import localization_pipeline
 
 app_testing = False
 
