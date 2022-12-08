@@ -1,5 +1,12 @@
+# Append root to path
+import sys
+import os
+
+sys.path.append(os.getcwd())
+
+
 from Uttilities.pipelines import *
-from localization.localization_pipe import localization_pipeline
+from localization.sliding_hashes.localize_sample_sh import localize_sample_sh
 from scipy.io.wavfile import read
 
 """
@@ -15,7 +22,7 @@ def evaluate(
     Parameters
     ----------
     raw_ref: np array of the reference song, before any processing
-    raw_recording: np array of the recording, before any proccesing
+    raw_recording: np array of the recording, before any processing
     recording_labels: data structure to be defined
             This stores our (X,Y), where the X represents a time point (in seconds)
             in the recorded song, and the Y represent the time at which that bit appears.
@@ -39,13 +46,7 @@ def evaluate(
         )
         constellation_record = sp_pipeline(recording_interval, fs_record, denoise=True)
 
-        # use shazam algorithm to localize snippet:
-        prediction = localization_pipeline(
-            constellation_ref,
-            constellation_record,
-            time_ahead=10,
-            sample_freq=fs_record,
-        )  # MUST be the recording Fs and not the reference one
+        prediction = localize_sample_sh(constellation_record, constellation_ref)[0][0]
 
         score_point = evaluate_localization_one_point(true_label, prediction)
         score += score_point
@@ -75,7 +76,7 @@ def evaluate_localization_one_point(
 
     -   The score will be 0 everywhere else
 
-    Here is a draqwing of how a score looks like
+    Here is a drawing of how a score looks like
 
     1                       -------------------
     .                      /                     \
@@ -187,23 +188,23 @@ def get_labeled_data(path_to_file):
 if __name__ == "__main__":
 
     Fs_ref, ref_song = read(
-        "../data/bach_prelude_c_major/Bach_prelude_original_1channel.wav"
+        "./data/bach_prelude_c_major/Bach_prelude_original_1channel.wav"
     )
 
     # paths to songs we will compare
     path1_rec = (
-        "../data/bach_prelude_c_major/mic/Bach_prelude_first_version_1channel.wav"
+        "./data/bach_prelude_c_major/mic/Bach_prelude_first_version_1channel.wav"
     )
     path2_rec = (
-        "../data/bach_prelude_c_major/mic/Bach_prelude_second_version_1channel.wav"
+        "./data/bach_prelude_c_major/mic/Bach_prelude_second_version_1channel.wav"
     )
-    path3_rec = "../data/bach_prelude_c_major/mic/BAch_prelude_Background_plus_mistake_1_channel.wav"
+    path3_rec = "./data/bach_prelude_c_major/mic/BAch_prelude_Background_plus_mistake_1_channel.wav"
 
     # paths to labeled data of songs
-    path1_labels = "../data/labelled_data/Bach_prelude_first_version_1channel.txt"
-    path2_labels = "../data/labelled_data/Bach_prelude_second_version_1channel.txt"
+    path1_labels = "./data/labelled_data/Bach_prelude_first_version_1channel.txt"
+    path2_labels = "./data/labelled_data/Bach_prelude_second_version_1channel.txt"
     path3_labels = (
-        "../data/labelled_data/BAch_prelude_Background_plus_mistake_1_channel.txt"
+        "./data/labelled_data/BAch_prelude_Background_plus_mistake_1_channel.txt"
     )
 
     paths = [
