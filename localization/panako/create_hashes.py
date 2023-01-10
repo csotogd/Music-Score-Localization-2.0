@@ -17,8 +17,8 @@ Constants required for Panako:
 - Time dilation: The percentage by which the time should be dilated
 """
 FREQ_SECTOR_SIZE = UPPER_FREQ / 8
-FREQ_SHIFT = 0.2
-TIME_DILATION = 0.1
+FREQ_SHIFT = 0.9
+TIME_DILATION = 0.95
 
 
 def create_hashes(constellation_map: list):
@@ -51,10 +51,6 @@ def create_hashes(constellation_map: list):
             freq_2 = freq_0 * FREQ_SHIFT
             t_2 = t_0 * TIME_DILATION
 
-            # Shifting the starting time has no effect, therefore will always present a division by 0 error
-            if t_0 == 0 and t_2 == 0:
-                continue
-
             # 4 bits
             freq_diff_1 = ((freq_0 - freq_1) / UPPER_FREQ) * (2 ** FREQ_BITS)
             # 4 bits
@@ -63,10 +59,13 @@ def create_hashes(constellation_map: list):
             f0_tilde = int(freq_0 / FREQ_SECTOR_SIZE)
             # 4 bits
             f2_tilde = int(freq_2 / FREQ_SECTOR_SIZE)
+
+            # Shifting the starting time/origin has no effect, therefore will always present a division by 0 error
             # 4 bits
-            t_ratio = (abs(t_1 - t_0) / abs(t_2 - t_0))
+            t_ratio = 0 if t_0 == 0 and t_2 == 0 else (abs(t_1 - t_0) / abs(t_2 - t_0))
             # 4 bits
             td = (t_2 - t_0)
+
             # 4 bits
             freq_0_binned = freq_0 / UPPER_FREQ * (2 ** FREQ_BITS)
 
