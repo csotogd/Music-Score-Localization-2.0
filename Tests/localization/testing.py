@@ -8,8 +8,9 @@ sys.path.append(os.getcwd())
 from localization.direct_comparison.localize_sample_d import localize_sample_d
 from localization.hashing.localize_sample_h import localize_sample_h
 from localization.sliding_hashes.localize_sample_sh import localize_sample_sh
+from localization.panako.localize_sample_panako import localize_sample_panako
 
-METHODS = [localize_sample_d, localize_sample_h, localize_sample_sh]
+METHODS = [localize_sample_d, localize_sample_h, localize_sample_sh, localize_sample_panako]
 
 # Import constellation generators
 from random_constellations import random_constellations
@@ -61,4 +62,4 @@ def random_test(method):
 
 
 if __name__ == "__main__":
-    random_test(method=localize_sample_sh)
+    random_test(method=localize_sample_panako)
