@@ -57,6 +57,109 @@ def evaluate(
     return score_normalized
 
 
+def evaluate_reduced_search_space(
+    raw_ref, fs_ref, raw_recording, fs_record, recording_labels, length_snippet_secs=3
+):
+    """
+    This functions evaluates how good our matching algorithm is, but it  is assumed that we can reduce the search space, i.e only take a fraction
+    of the reference song to look into. In practice, the information needed to reduce the search space would be provided by the user.
+
+    Parameters
+    ----------
+    raw_ref: np array of the reference song, before any processing
+    raw_recording: np array of the recording, before any processing
+    recording_labels: data structure to be defined
+            This stores our (X,Y), where the X represents a time point (in seconds)
+            in the recorded song, and the Y represent the time at which that bit appears.
+    fs_ref: int sampling frequency of the reference song in Hz
+    fs_record: int sampling frequency of the recorded song in Hz
+
+    Returns
+    -------
+    a score (to be defined)
+
+    """
+    # calculate constellation map for each
+    constellation_ref = sp_pipeline(raw_ref, fs_ref, denoise=False)
+
+
+    score = 0
+    for time_recording, true_label in recording_labels:
+        #get subset of the constellation map
+        const_ref_subset = get_fraction_of_ref_song(ref_song_cons_map=constellation_ref, fs_ref=fs_ref, indication_time=true_label,lenght_seconds_ref_song=len(ref_song)/fs_ref,
+                                 length_subset=30)
+
+
+        # get an interval of the song around the point in the recording
+        recording_interval = get_song_interval(
+            raw_recording, time_recording, fs_record, length_sec=length_snippet_secs
+        )
+        constellation_record = sp_pipeline(recording_interval, fs_record, denoise=True)
+
+        predictions, _ = localize_sample_sh(
+            constellation_record, constellation_ref, fs_record
+        )
+
+        score_point = evaluate_localization(true_label, predictions)
+        score += score_point
+
+    score_normalized = score / len(recording_labels)
+    return score_normalized
+
+
+
+def get_fraction_of_ref_song(ref_song_cons_map, fs_ref, indication_time, length_subset, lenght_seconds_ref_song):
+    """
+    Gets a subset of the constellation map of the reference song.
+
+    Parameters
+    ----------
+    ref_song_cons_map: constellation map of reference song
+    fs_ref: sampling frequency (Hz) of ref song
+    indication_label: time in seconds which is used as a central point (approcimation) of the subset to be returned.
+    length_subset: legnth in seconds of the suibset to be returned.  the subset must be of that length, so the indication time will be placed
+                in the extreme points if no other alternatives exist. MUST BE SMALLER THAN THE LENGHT IN SECONDS OF THE REFERENCE SONG
+    lenght_seconds_ref_song: length of ref song
+    Returns
+    -------
+    subset of ref_song_cons_map.   same data type
+    """
+    if lenght_seconds_ref_song< length_subset:
+        raise Exception("Length of subset must be smaller than length of reference song")
+
+    #First of all we will compute the seconds at which our interval should theoretically start at and its corresponding index
+
+    seconds_start = indication_time-length_subset/2
+    seconds_end =  indication_time + length_subset / 2
+    #now we check for edge cases
+    if (length_subset - (seconds_end- seconds_end)) > 0.1: #the interval is not of desired length
+        if seconds_start<0: # we are at the beginning of the song
+            seconds_start= 0
+            seconds_end = length_subset
+        else:# we are at the end.
+            seconds_end = lenght_seconds_ref_song
+            seconds_start= seconds_end- length_subset
+
+    desired_obs_start = seconds_start*fs_ref
+    desired_obs_end = seconds_end* fs_ref
+
+    # The constellation map is a list of tuples ordered by time, hence finding a time interval in it can be done in linear time
+    # We will compute a subset as close as possible to the target one. In case of disambiguation we make the subset smaller.
+    for i in range(len(ref_song_cons_map)):
+        obs = ref_song_cons_map[i][0]
+        if obs>= desired_obs_start:
+            index_start = i
+            break
+
+    for i in range(index_start, len(ref_song_cons_map)):
+        obs = ref_song_cons_map[i][0]
+        if obs >= desired_obs_end:
+            index_end = i
+            break
+
+    subset_cons_map = ref_song_cons_map[index_start: index_end]
+    return subset_cons_map
+
 def evaluate_localization(
     true_label,
     predictions,
@@ -152,8 +255,8 @@ def get_song_interval(raw_recording, time_recording, fs, length_sec=3):
     Parameters
     ----------
     raw_recording np.array of the song for which we want to obtain a subset (in the time domain)
-    time_recording: float second ([0, inf]) which is the center of the interval we want to obtain
-    length_sec: float length of the interval we want to return
+    time_recording: float second ([0, inf]) which is the beginning of the interval we want to obtain. Watch out, now we do the beginning instead of the center.
+    length_sec: float length of the interval we want to return.
 
     Returns
     -------
@@ -161,8 +264,8 @@ def get_song_interval(raw_recording, time_recording, fs, length_sec=3):
 
     """
 
-    seconds_start = time_recording - length_sec / 2
-    seconds_end = time_recording + length_sec / 2
+    seconds_start = time_recording
+    seconds_end = time_recording + length_sec
 
     index_start = max(0, int(seconds_start * fs))
     index_end = min(len(raw_recording), int(seconds_end * fs))
@@ -240,7 +343,7 @@ if __name__ == "__main__":
         # for each song try different lengths of snippets:
         for length_snippet in length_snippets_in_secs:
 
-            score = evaluate(
+            score = evaluate_reduced_search_space(
                 raw_ref=ref_song,
                 fs_ref=Fs_ref,
                 raw_recording=record_song,
@@ -248,8 +351,10 @@ if __name__ == "__main__":
                 recording_labels=labelled_data,
                 length_snippet_secs=length_snippet,
             )
-            scores.append(score)
+            print('done with snippets of length: ', length_snippet)
 
+            scores.append(score)
+        print('done with one version. moving onto the next.')
     names = ["first version"] #, "second version", "third version"]
     print()
     print()

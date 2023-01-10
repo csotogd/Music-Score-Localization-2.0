@@ -37,6 +37,6 @@ def localize_sample_sh(
     matching_indices, matching_score = match(sample_array, song_array)
     matching_times = [song_idx_dict[i] / sample_freq for i in matching_indices]
 
-    print("match found with seconds: ", matching_times)
+    #print("match found with seconds: ", matching_times)
 
     return matching_times, matching_score
