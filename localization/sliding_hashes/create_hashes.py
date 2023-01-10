@@ -32,10 +32,15 @@ def create_hashes(constellation_map: list):
             freq_0_binned = freq_0 / UPPER_FREQ * (2**FREQ_BITS)
             freq_1_binned = freq_1 / UPPER_FREQ * (2**FREQ_BITS)
 
-            hash = int(freq_0_binned) | (int(freq_1_binned) << 10) | (int(td) << 20)
+            hash = (
+                int(freq_0_binned)
+                | (int(freq_1_binned) << FREQ_BITS)
+                | (int(td) << (2 * FREQ_BITS))
+            )
 
             hashes_list.append(hash)
             index_dict[arr_ind] = t_0
             arr_ind += 1
 
+    print(hashes_list)
     return np.asarray(hashes_list), index_dict
