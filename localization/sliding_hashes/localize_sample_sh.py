@@ -50,12 +50,12 @@ def localize_sample_sh(
 
     with ThreadPoolExecutor() as executor:
 
-        thread_list = [executor.submit(match, *[sample_array, ref_segments[thread]]) for thread in range(threads)]
+        thread_list = [executor.submit(match, *[sample_array, ref_segments[thread], thread, ref_subdivision_length]) for thread in range(threads)]
         results = [thread.result() for thread in thread_list]
 
-    matching_indices, matching_score = max(results, key=lambda x: x[1])
-    matching_times = [song_idx_dict[i] / sample_freq for i in matching_indices]
+        matching_indices, matching_score = max(results, key=lambda x: x[1])
+        matching_times = [song_idx_dict[i] / sample_freq for i in matching_indices]
 
-    print("match found with seconds: ", matching_times)
+        print("match found with seconds: ", matching_times)
 
     return matching_times, matching_score

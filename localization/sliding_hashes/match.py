@@ -1,7 +1,8 @@
 import numpy as np
+from math import ceil
 
 
-def match(sample_hash_array: np.ndarray, song_hash_array: np.ndarray):
+def match(sample_hash_array: np.ndarray, song_hash_array: np.ndarray, thread, ref_subdivision_length):
     """
     A function which compares the sample hash array with the song
     hash array by sliding the first over the second and counting
@@ -22,4 +23,9 @@ def match(sample_hash_array: np.ndarray, song_hash_array: np.ndarray):
         elif score == max_score:
             indices.append(i)
 
-    return indices, max_score / sample_len
+    if thread != 0:
+        shifted_indices = [idx + thread*ref_subdivision_length-ceil(sample_len/2) for idx in indices]
+    else:
+        shifted_indices = indices
+
+    return shifted_indices, max_score / sample_len
