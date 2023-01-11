@@ -1,5 +1,7 @@
 from localization.sliding_hashes.create_hashes import create_hashes
 from localization.sliding_hashes.match import match
+from concurrent.futures import ThreadPoolExecutor
+from math import ceil
 
 
 class global_hashes:
@@ -34,9 +36,26 @@ def localize_sample_sh(
         song_idx_dict = global_hashes.song_idx_dict
 
     sample_array, _ = create_hashes(sample_constellation_map)
-    matching_indices, matching_score = match(sample_array, song_array)
+
+    threads = 5
+    ref_subdivision_length = int(len(song_array) / threads)
+    snippet_half = ceil(len(sample_array) / 2)
+
+    ref_segments = [song_array[:ref_subdivision_length + snippet_half],
+                    song_array[ref_subdivision_length - snippet_half:2 * ref_subdivision_length + snippet_half],
+                    song_array[2 * ref_subdivision_length - snippet_half:3 * ref_subdivision_length + snippet_half],
+                    song_array[3 * ref_subdivision_length - snippet_half:4 * ref_subdivision_length + snippet_half],
+                    song_array[4 * ref_subdivision_length - snippet_half:]
+                    ]
+
+    with ThreadPoolExecutor() as executor:
+
+        thread_list = [executor.submit(match, *[sample_array, ref_segments[thread]]) for thread in range(threads)]
+        results = [thread.result() for thread in thread_list]
+
+    matching_indices, matching_score = max(results, key=lambda x: x[1])
     matching_times = [song_idx_dict[i] / sample_freq for i in matching_indices]
 
-    #print("match found with seconds: ", matching_times)
+    print("match found with seconds: ", matching_times)
 
     return matching_times, matching_score
