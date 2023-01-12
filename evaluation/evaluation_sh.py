@@ -152,11 +152,16 @@ def get_fraction_of_ref_song(ref_song_cons_map, fs_ref, indication_time, length_
             index_start = i
             break
 
+    index_end = None
+
     for i in range(index_start, len(ref_song_cons_map)):
         obs = ref_song_cons_map[i][0]
         if obs >= desired_obs_end:
             index_end = i
             break
+
+    if index_end is None:
+        index_end = len(ref_song_cons_map) - 1
 
     subset_cons_map = ref_song_cons_map[index_start: index_end]
     return subset_cons_map
@@ -304,23 +309,23 @@ def get_labeled_data(path_to_file):
 if __name__ == "__main__":
 
     Fs_ref, ref_song = read(
-        "../data/Clair_de_lune_original_1channel.wav"
-        # "../data/bach_prelude_c_major/Bach_prelude_original_1channel.wav"
+        #"../data/Clair_de_lune_original_1channel.wav"
+         "../data/bach_prelude_c_major/Bach_prelude_original_1channel.wav"
     )
 
     # paths to songs we will compare
-    path1_rec = (
-        "../data/claire_de_lune_record1_kris_1channel.wav"
-    )
-    # path1_rec = ("../data/bach_prelude_c_major/mic/Bach_prelude_first_version_1channel.wav")
+    #path1_rec = (
+    #    "../data/claire_de_lune_record1_kris_1channel.wav"
+    #)
+    path1_rec = ("../data/bach_prelude_c_major/mic/Bach_prelude_first_version_1channel.wav")
     # path2_rec = (
     #    "../data/bach_prelude_c_major/mic/Bach_prelude_second_version_1channel.wav"
     # )
     # path3_rec = "../data/bach_prelude_c_major/mic/BAch_prelude_Background_plus_mistake_1_channel.wav"
 
     # paths to labeled data of songs
-    path1_labels = "../data/claire_de_lune_record1_kris.txt"
-    # path1_labels = ../data/labelled_data/Bach_prelude_first_version_1channel.txt
+    #path1_labels = "../data/claire_de_lune_record1_kris.txt"
+    path1_labels = "../data/labelled_data/Bach_prelude_first_version_1channel.txt"
     # path2_labels = "../data/labelled_data/Bach_prelude_second_version_1channel.txt"
     # path3_labels = (
     #    "../data/labelled_data/BAch_prelude_Background_plus_mistake_1_channel.txt"
@@ -375,7 +380,7 @@ if __name__ == "__main__":
             )
         print()
 
-    """
+
     print()
     print()
     print()
@@ -418,5 +423,5 @@ if __name__ == "__main__":
                 scores[i * len(length_snippets_in_secs) + j],
             )
         print()
-"""
+
 
