@@ -98,7 +98,7 @@ def evaluate_reduced_search_space(
         constellation_record = sp_pipeline(recording_interval, fs_record, denoise=True)
 
         predictions, _ = localize_sample_sh(
-            constellation_record, constellation_ref, fs_record
+            constellation_record, const_ref_subset, fs_record
         )
 
         score_point = evaluate_localization(true_label, predictions)
@@ -375,6 +375,7 @@ if __name__ == "__main__":
             )
         print()
 
+    """
     print()
     print()
     print()
@@ -417,4 +418,5 @@ if __name__ == "__main__":
                 scores[i * len(length_snippets_in_secs) + j],
             )
         print()
+"""
 
