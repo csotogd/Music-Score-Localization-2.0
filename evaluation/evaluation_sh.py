@@ -1,6 +1,7 @@
 # Append root to path
 import sys
 import os
+import time
 
 sys.path.append(os.getcwd())
 
@@ -336,6 +337,7 @@ if __name__ == "__main__":
     scores = []
 
     # now we evaluate all songs
+    start_time = time.time()
     for path_rec, path_labels in paths:
         labelled_data = get_labeled_data(path_labels)
         Fs_record, record_song = read(path_rec)
@@ -352,13 +354,14 @@ if __name__ == "__main__":
                 length_snippet_secs=length_snippet,
             )
             print('done with snippets of length: ', length_snippet)
-
             scores.append(score)
         print('done with one version. moving onto the next.')
     names = ["first version"] #, "second version", "third version"]
     print()
     print()
     print()
+    end_time = time.time()
+    print("Total time taken: ", end_time-start_time)
     print("----------------EVALUATION RESULTS ---------------------")
     for i in range(len(names)):
         for j in range(len(length_snippets_in_secs)):
@@ -371,3 +374,47 @@ if __name__ == "__main__":
                 scores[i * len(length_snippets_in_secs) + j],
             )
         print()
+
+    print()
+    print()
+    print()
+    print("----------COMPARING A SONG TO ITSELF--------")
+    scores=[]
+    for path_rec, path_labels in paths:
+        labelled_data = get_labeled_data(path_labels)
+        for i in range(len(labelled_data)):
+            labelled_data[i] = (labelled_data[i][1], labelled_data[i][1])
+        Fs_record, record_song = read(path_rec)
+
+        # for each song try different lengths of snippets:
+        for length_snippet in length_snippets_in_secs:
+            score = evaluate_reduced_search_space(
+                raw_ref=ref_song,
+                fs_ref=Fs_ref,
+                raw_recording=ref_song,
+                fs_record=Fs_ref,
+                recording_labels=labelled_data,
+                length_snippet_secs=length_snippet,
+            )
+            print('done with snippets of length: ', length_snippet)
+            scores.append(score)
+        print('done with one version. moving onto the next.')
+    names = ["first version"]  # , "second version", "third version"]
+    print()
+    print()
+    print()
+    end_time = time.time()
+    print("Total time taken: ", end_time - start_time)
+    print("----------------EVALUATION RESULTS FOR SONG TO ITSELF---------------------")
+    for i in range(len(names)):
+        for j in range(len(length_snippets_in_secs)):
+            print(
+                "score for ",
+                names[i],
+                " and snippet of ",
+                length_snippets_in_secs[j],
+                " seconds ---->",
+                scores[i * len(length_snippets_in_secs) + j],
+            )
+        print()
+
