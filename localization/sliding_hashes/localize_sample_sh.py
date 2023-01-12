@@ -2,6 +2,7 @@ from localization.sliding_hashes.create_hashes import create_hashes
 from localization.sliding_hashes.match import match
 from concurrent.futures import ThreadPoolExecutor
 from math import ceil
+import time
 
 
 class global_hashes:
@@ -25,6 +26,8 @@ def localize_sample_sh(
         - The matching score for the times in the list.
     """
 
+    start = time.time()
+
     if global_hashes.song_array is None:
         song_array, song_idx_dict = create_hashes(song_constellation_map)
         global_hashes.song_array = song_array
@@ -37,16 +40,28 @@ def localize_sample_sh(
 
     sample_array, _ = create_hashes(sample_constellation_map)
 
-    threads = 5
+    threads = 10
     ref_subdivision_length = int(len(song_array) / threads)
     snippet_half = ceil(len(sample_array) / 2)
 
-    ref_segments = [song_array[:ref_subdivision_length + snippet_half],
+    coords = []
+
+    for thread in range(threads):
+        if thread == 0:
+            coords.append((0, ref_subdivision_length+snippet_half))
+        elif thread != threads-1:
+            coords.append((thread*ref_subdivision_length-snippet_half, (thread+1)*ref_subdivision_length+snippet_half))
+        else:
+            coords.append((thread*ref_subdivision_length-snippet_half, len(song_array)))
+
+    ref_segments = [song_array[coord[0]:coord[1]] for coord in coords]
+
+    '''ref_segments = [song_array[:ref_subdivision_length + snippet_half],
                     song_array[ref_subdivision_length - snippet_half:2 * ref_subdivision_length + snippet_half],
                     song_array[2 * ref_subdivision_length - snippet_half:3 * ref_subdivision_length + snippet_half],
                     song_array[3 * ref_subdivision_length - snippet_half:4 * ref_subdivision_length + snippet_half],
                     song_array[4 * ref_subdivision_length - snippet_half:]
-                    ]
+                    ]'''
 
     with ThreadPoolExecutor() as executor:
 
@@ -57,5 +72,8 @@ def localize_sample_sh(
         matching_times = [song_idx_dict[i] / sample_freq for i in matching_indices]
 
         print("match found with seconds: ", matching_times)
+
+    done = time.time()
+    print(done-start)
 
     return matching_times, matching_score
