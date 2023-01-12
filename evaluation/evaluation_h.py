@@ -1,4 +1,5 @@
 from Uttilities.pipelines import *
+from evaluation.evaluation_sh import get_fraction_of_ref_song
 from localization.hashing.localization_pipe import localization_pipeline
 from scipy.io.wavfile import read
 
@@ -53,6 +54,59 @@ def evaluate(
     score_normalized = score / len(recording_labels)
     return score_normalized
 
+
+def evaluate_reduced_search_space(
+    raw_ref, fs_ref, raw_recording, fs_record, recording_labels, length_snippet_secs=3
+):
+    """
+    This functions evaluates how good our matching algorithm is, but it  is assumed that we can reduce the search space, i.e only take a fraction
+    of the reference song to look into. In practice, the information needed to reduce the search space would be provided by the user.
+
+    Parameters
+    ----------
+    raw_ref: np array of the reference song, before any processing
+    raw_recording: np array of the recording, before any processing
+    recording_labels: data structure to be defined
+            This stores our (X,Y), where the X represents a time point (in seconds)
+            in the recorded song, and the Y represent the time at which that bit appears.
+    fs_ref: int sampling frequency of the reference song in Hz
+    fs_record: int sampling frequency of the recorded song in Hz
+
+    Returns
+    -------
+    a score (to be defined)
+
+    """
+    # calculate constellation map for each
+    constellation_ref = sp_pipeline(raw_ref, fs_ref, denoise=False)
+
+
+    score = 0
+    for time_recording, true_label in recording_labels:
+        #get subset of the constellation map
+        const_ref_subset = get_fraction_of_ref_song(ref_song_cons_map=constellation_ref, fs_ref=fs_ref, indication_time=true_label,lenght_seconds_ref_song=len(ref_song)/fs_ref,
+                                 length_subset=30)
+
+
+        # get an interval of the song around the point in the recording
+        recording_interval = get_song_interval(
+            raw_recording, time_recording, fs_record, length_sec=length_snippet_secs
+        )
+        constellation_record = sp_pipeline(recording_interval, fs_record, denoise=True)
+
+        prediction = localization_pipeline(
+            const_ref_subset,
+            constellation_record,
+            time_ahead=10,
+            sample_freq=fs_record,
+        )  # MUST be the recording Fs and not the reference one
+
+
+        score_point = evaluate_localization_one_point(true_label, prediction)
+        score += score_point
+
+    score_normalized = score / len(recording_labels)
+    return score_normalized
 
 def evaluate_localization_one_point(
     true_label,
@@ -225,7 +279,7 @@ if __name__ == "__main__":
         # for each song try different lengths of snippets:
         for length_snippet in length_snippets_in_secs:
 
-            score = evaluate(
+            score = evaluate_reduced_search_space(
                 raw_ref=ref_song,
                 fs_ref=Fs_ref,
                 raw_recording=record_song,

@@ -164,7 +164,7 @@ def get_fraction_of_ref_song(ref_song_cons_map, fs_ref, indication_time, length_
 def evaluate_localization(
     true_label,
     predictions,
-    interval_side_perfect_length=1,
+    interval_side_perfect_length=3,
     interval_side_relevant_length=2,
 ):
     """
