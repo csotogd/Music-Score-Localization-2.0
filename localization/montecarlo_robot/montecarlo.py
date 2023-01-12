@@ -1,6 +1,7 @@
 import random
 from numpy import arange
 import numpy as np
+from matplotlib import pyplot as plt
 def create_initial_set_of_particles(nr_particles, length_ref_subset):
     """
     Creates and return an initial set of particles S_0. This is done by uniformly randomly selecting 
@@ -20,17 +21,21 @@ def create_initial_set_of_particles(nr_particles, length_ref_subset):
 
     return particles
 
-def prediction_phase(S_k_minus_1):
+def prediction_phase(S_k_minus_1, length_ref):
+    S_prime_k=[]
     for i in range(len(S_k_minus_1)):
         particle = S_k_minus_1[i]
-        probs_x= generate_prob_xk_of_prediction_phase(particle)
-        generate_new_particle_prediction_phase()
+        probs_x= generate_prob_xk_of_prediction_phase(particle, length_ref)
+        new_particle = generate_new_particle_prediction_phase(probs_x)
+
+    S_prime_k.append(new_particle)
+    return S_prime_k
 
 def update_phase():
     generate_weights_m_i_k()
     generate_new_set_of_particles_update_phase()
 
-def generate_prob_xk_of_prediction_phase(particle,length_side ,length_ref,step_size=0.1):
+def generate_prob_xk_of_prediction_phase(particle,length_ref, length_side=1 ,step_size=0.1):
     """
     Here we are calculating the probability of being in a certain point knowing the resulting set of particles in the previous phase and
     not knowing the input at time k. This is the probability distribution that is calculated under the prediction phase of the paper. 
@@ -84,10 +89,8 @@ def generate_prob_xk_of_prediction_phase(particle,length_side ,length_ref,step_s
         probs_x[i][1]    = 1 + (time- particle)* - slope
         i += 1
 
-    print(sum(probs_x[:,1]))
     #now we normalize the probability
     probs_x[:,1] /=sum(probs_x[:,1])
-    print(sum(probs_x[:,1]))
     return probs_x
 
 def generate_new_particle_prediction_phase(probs_x):
@@ -105,7 +108,15 @@ def generate_new_particle_prediction_phase(probs_x):
     -------
     a new particle (float), which represents a time point.
     """
-    return ""
+    new_particle = None
+    cum_sum = np.cumsum(probs_x[:, 1])
+    random_limit = random.random()
+    for i in range(len(cum_sum)):
+        prob = cum_sum[i]
+        if random_limit>= prob:
+            new_particle= probs_x[i][0]
+
+    return new_particle
 
 
 
@@ -117,4 +128,5 @@ def generate_new_set_of_particles_update_phase():
     return "implement"
 
 if __name__ == '__main__':
-    (generate_prob_xk_of_prediction_phase(particle=5, length_side=3, length_ref=10, step_size=0.1))
+    probs_x= (generate_prob_xk_of_prediction_phase(particle=5, length_side=3, length_ref=10, step_size=0.1))
+    generate_new_particle_prediction_phase(probs_x)
