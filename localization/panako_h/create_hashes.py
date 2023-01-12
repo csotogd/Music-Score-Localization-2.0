@@ -3,6 +3,7 @@ import numpy as np
 # Constants for hash creation
 UPPER_FREQ = 23_000
 FREQ_BITS = 4
+TR_BITS = 4
 
 """
 Constants required for Panako:
@@ -38,10 +39,7 @@ def create_hashes(constellation_map: list):
         the corresponding hash is encountered.
     """
 
-    index_dict = {}
-    hashes_list = []
-
-    arr_ind = 0
+    hashes = {}
 
     for i, (t_0, freq_0) in enumerate(constellation_map):
         for j, (t_1, freq_1) in enumerate(constellation_map[i : i + 10]):
@@ -52,13 +50,17 @@ def create_hashes(constellation_map: list):
                 # 4 bits
                 freq_diff_2 = ((freq_1 - freq_2) / UPPER_FREQ) * (2**FREQ_BITS)
                 # 4 bits
-                f0_tilde = int(freq_0 / FREQ_SECTOR_SIZE)
+                f0_tilde = freq_0 / FREQ_SECTOR_SIZE
                 # 4 bits
-                f2_tilde = int(freq_2 / FREQ_SECTOR_SIZE)
+                f2_tilde = freq_2 / FREQ_SECTOR_SIZE
 
                 # Shifting the starting time/origin has no effect, therefore will always present a division by 0 error
                 # 4 bits
-                t_ratio = 0 if t_2 - t_0 == 0 else (abs(t_1 - t_0) / abs(t_2 - t_0))
+                t_ratio = (
+                    0
+                    if t_2 - t_0 == 0
+                    else ((abs(t_1 - t_0) / abs(t_2 - t_0))) * (2**TR_BITS)
+                )
                 # 4 bits
                 td = t_2 - t_0
 
@@ -68,17 +70,16 @@ def create_hashes(constellation_map: list):
                 # 32-bit hash
                 hash = (
                     int(freq_diff_1)
-                    | int(freq_diff_2) << 4
-                    | f0_tilde << 8
-                    | f2_tilde << 12
-                    | int(t_ratio) << 16
-                    | int(t_0) << 20
-                    | int(freq_0_binned) << 24
-                    | int(td) << 28
+                    | int(freq_diff_2) << FREQ_BITS
+                    | int(freq_0_binned) << 2 * FREQ_BITS
+                    | int(f0_tilde) << 3 * FREQ_BITS
+                    | int(f2_tilde) << 3 * FREQ_BITS + 3
+                    | int(t_ratio) << 3 * FREQ_BITS + 6
+                    | int(td) << 3 * FREQ_BITS + 6 + TR_BITS
                 )
 
-                hashes_list.append(hash)
-                index_dict[arr_ind] = t_0
-                arr_ind += 1
+                if hash not in hashes:
+                    hashes[hash] = []
+                hashes[hash].append(t_0)
 
-    return np.asarray(hashes_list).astype(np.uint64), index_dict
+    return hashes

@@ -1,8 +1,8 @@
 from Signal_Processing.IO.Audio_IO import Parameters_IO
-from Uttilities.Generator_segments import Generator_segments_recorded
+from Utilities.Generator_segments import Generator_segments_recorded
 from scipy.io.wavfile import read
 from Signal_Processing.signal_plotting import plot_signal
-from Uttilities.pipelines import *
+from Utilities.pipelines import *
 from Signal_Processing.IO.Audio_IO import Segment_reader
 
 import threading

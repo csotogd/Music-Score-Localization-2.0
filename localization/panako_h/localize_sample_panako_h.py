@@ -1,13 +1,12 @@
-from localization.panako.create_hashes import create_hashes
-from localization.panako.match import match
+from localization.panako_h.create_hashes import create_hashes
+from localization.panako_h.match import match
 
 
 class global_hashes:
-    song_array = None
-    song_idx_dict = None
+    song_hashes = None
 
 
-def localize_sample_panako(
+def localize_sample_panako_h(
     sample_constellation_map: list, song_constellation_map: list, sample_freq=1
 ):
     """
@@ -23,20 +22,25 @@ def localize_sample_panako(
         - The matching score for the times in the list.
     """
 
-    if global_hashes.song_array is None:
-        song_array, song_idx_dict = create_hashes(song_constellation_map)
-        global_hashes.song_array = song_array
-        global_hashes.song_idx_dict = song_idx_dict
+    if global_hashes.song_hashes is None:
+        song_hashes = create_hashes(song_constellation_map)
+        global_hashes.song_hashes = song_hashes
         print("created new song hashes")
 
     else:
-        song_array = global_hashes.song_array
-        song_idx_dict = global_hashes.song_idx_dict
+        song_hashes = global_hashes.song_hashes
 
-    sample_array, _ = create_hashes(sample_constellation_map)
-    matching_indices, matching_score = match(sample_array, song_array)
-    matching_times = [song_idx_dict[i] / sample_freq for i in matching_indices]
+    sample_hashes = create_hashes(sample_constellation_map)
+    matches = match(sample_hashes, song_hashes)
 
-    # print("match found with seconds: ", matching_times)
+    match_times = []
+    max_matches = 0
 
-    return matching_times, matching_score
+    for time in matches:
+        if matches[time] > max_matches:
+            max_matches = matches[time]
+            match_times = [time / sample_freq]
+        elif matches[time] == max_matches:
+            match_times.append(time / sample_freq)
+
+    return match_times, max_matches

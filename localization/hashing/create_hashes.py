@@ -1,4 +1,4 @@
-def create_hashes(constellation_map, time_ahead):
+def create_hashes(constellation_map, time_ahead=10):
 
     """
     This function is in charge of constructing a dictionary of lists holding information about

@@ -1,6 +1,6 @@
 from localization.hashing.create_hashes import create_hashes
 from localization.hashing.match import match
-from localization.hashing.localize_sample_h import localize_sample_h
+from localization.hashing.localize_sample_h import localize_sample_h_old
 import time
 
 
@@ -36,7 +36,7 @@ def localization_pipeline(
     # how many matches per time instance as a dicitonary
     matches = match(snippet_hashes, song_hashes)
 
-    match_time = localize_sample_h(matches, sample_freq)
+    match_time = localize_sample_h_old(matches, sample_freq)
     print("match found with second: ", match_time)
     return match_time
 
