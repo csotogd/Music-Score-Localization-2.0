@@ -58,7 +58,6 @@ def localize_sample_sh(
 
     with ProcessPoolExecutor() as executor:
 
-        # args = [[sample_array, ref_segments[thread], thread, ref_subdivision_length] for thread in range(thread)]
         results = executor.map(match, [sample_array]*10, ref_segments, [thread for thread in range(threads)], [ref_subdivision_length]*10)
 
     matching_indices, matching_score = max(results, key=lambda x: x[1])
