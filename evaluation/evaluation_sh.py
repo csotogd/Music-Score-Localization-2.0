@@ -133,7 +133,7 @@ def get_fraction_of_ref_song(ref_song_cons_map, fs_ref, indication_time, length_
     seconds_start = indication_time-length_subset/2
     seconds_end =  indication_time + length_subset / 2
     #now we check for edge cases
-    if (length_subset - (seconds_end- seconds_end)) > 0.1: #the interval is not of desired length
+    if (length_subset - (seconds_end- seconds_start)) > 0.1: #the interval is not of desired length
         if seconds_start<0: # we are at the beginning of the song
             seconds_start= 0
             seconds_end = length_subset
