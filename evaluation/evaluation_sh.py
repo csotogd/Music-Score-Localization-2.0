@@ -1,6 +1,7 @@
 # Append root to path
 import sys
 import os
+import time
 
 sys.path.append(os.getcwd())
 
@@ -97,7 +98,7 @@ def evaluate_reduced_search_space(
         constellation_record = sp_pipeline(recording_interval, fs_record, denoise=True)
 
         predictions, _ = localize_sample_sh(
-            constellation_record, constellation_ref, fs_record
+            constellation_record, const_ref_subset, fs_record
         )
 
         score_point = evaluate_localization(true_label, predictions)
@@ -132,7 +133,7 @@ def get_fraction_of_ref_song(ref_song_cons_map, fs_ref, indication_time, length_
     seconds_start = indication_time-length_subset/2
     seconds_end =  indication_time + length_subset / 2
     #now we check for edge cases
-    if (length_subset - (seconds_end- seconds_end)) > 0.1: #the interval is not of desired length
+    if (length_subset - (seconds_end- seconds_start)) > 0.1: #the interval is not of desired length
         if seconds_start<0: # we are at the beginning of the song
             seconds_start= 0
             seconds_end = length_subset
@@ -151,11 +152,14 @@ def get_fraction_of_ref_song(ref_song_cons_map, fs_ref, indication_time, length_
             index_start = i
             break
 
+    index_end = None
     for i in range(index_start, len(ref_song_cons_map)):
         obs = ref_song_cons_map[i][0]
         if obs >= desired_obs_end:
             index_end = i
             break
+    if index_end is None:
+        index_end = len(ref_song_cons_map) - 1
 
     subset_cons_map = ref_song_cons_map[index_start: index_end]
     return subset_cons_map
@@ -163,7 +167,7 @@ def get_fraction_of_ref_song(ref_song_cons_map, fs_ref, indication_time, length_
 def evaluate_localization(
     true_label,
     predictions,
-    interval_side_perfect_length=1,
+    interval_side_perfect_length=3,
     interval_side_relevant_length=2,
 ):
     """
@@ -208,6 +212,8 @@ def evaluate_localization(
     -------
     float, score of our match, must be between 0 and 1
     """
+    if len(predictions)==0:
+        return 0
     scores = []
     for prediction in predictions:
         if (
@@ -304,7 +310,7 @@ if __name__ == "__main__":
 
     Fs_ref, ref_song = read(
         "../data/Clair_de_lune_original_1channel.wav"
-        # "../data/bach_prelude_c_major/Bach_prelude_original_1channel.wav"
+         #"../data/bach_prelude_c_major/Bach_prelude_original_1channel.wav"
     )
 
     # paths to songs we will compare
@@ -312,15 +318,15 @@ if __name__ == "__main__":
         "../data/claire_de_lune_record1_kris_1channel.wav"
     )
     # path1_rec = ("../data/bach_prelude_c_major/mic/Bach_prelude_first_version_1channel.wav")
-    # path2_rec = (
-    #    "../data/bach_prelude_c_major/mic/Bach_prelude_second_version_1channel.wav"
-    # )
+    #path2_rec = (
+    #  "../data/bach_prelude_c_major/mic/Bach_prelude_second_version_1channel.wav"
+    #)
     # path3_rec = "../data/bach_prelude_c_major/mic/BAch_prelude_Background_plus_mistake_1_channel.wav"
 
     # paths to labeled data of songs
     path1_labels = "../data/claire_de_lune_record1_kris.txt"
     # path1_labels = ../data/labelled_data/Bach_prelude_first_version_1channel.txt
-    # path2_labels = "../data/labelled_data/Bach_prelude_second_version_1channel.txt"
+    #path2_labels = "../data/labelled_data/Bach_prelude_second_version_1channel.txt"
     # path3_labels = (
     #    "../data/labelled_data/BAch_prelude_Background_plus_mistake_1_channel.txt"
     # )
@@ -336,6 +342,7 @@ if __name__ == "__main__":
     scores = []
 
     # now we evaluate all songs
+    start_time = time.time()
     for path_rec, path_labels in paths:
         labelled_data = get_labeled_data(path_labels)
         Fs_record, record_song = read(path_rec)
@@ -352,13 +359,14 @@ if __name__ == "__main__":
                 length_snippet_secs=length_snippet,
             )
             print('done with snippets of length: ', length_snippet)
-
             scores.append(score)
         print('done with one version. moving onto the next.')
     names = ["first version"] #, "second version", "third version"]
     print()
     print()
     print()
+    end_time = time.time()
+    print("Total time taken: ", end_time-start_time)
     print("----------------EVALUATION RESULTS ---------------------")
     for i in range(len(names)):
         for j in range(len(length_snippets_in_secs)):
@@ -371,3 +379,49 @@ if __name__ == "__main__":
                 scores[i * len(length_snippets_in_secs) + j],
             )
         print()
+
+
+    print()
+    print()
+    print()
+    print("----------COMPARING A SONG TO ITSELF--------")
+    scores=[]
+    for path_rec, path_labels in paths:
+        labelled_data = get_labeled_data(path_labels)
+        for i in range(len(labelled_data)):
+            labelled_data[i] = (labelled_data[i][1], labelled_data[i][1])
+        Fs_record, record_song = read(path_rec)
+
+        # for each song try different lengths of snippets:
+        for length_snippet in length_snippets_in_secs:
+            score = evaluate(
+                raw_ref=ref_song,
+                fs_ref=Fs_ref,
+                raw_recording=ref_song,
+                fs_record=Fs_ref,
+                recording_labels=labelled_data,
+                length_snippet_secs=length_snippet,
+            )
+            print('done with snippets of length: ', length_snippet)
+            scores.append(score)
+        print('done with one version. moving onto the next.')
+    names = ["first version"]  # , "second version", "third version"]
+    print()
+    print()
+    print()
+    end_time = time.time()
+    print("Total time taken: ", end_time - start_time)
+    print("----------------EVALUATION RESULTS FOR SONG TO ITSELF---------------------")
+    for i in range(len(names)):
+        for j in range(len(length_snippets_in_secs)):
+            print(
+                "score for ",
+                names[i],
+                " and snippet of ",
+                length_snippets_in_secs[j],
+                " seconds ---->",
+                scores[i * len(length_snippets_in_secs) + j],
+            )
+        print()
+
+

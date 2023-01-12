@@ -55,7 +55,8 @@ def build_constellation_map(frequencies, times, stft, fs):
      """
     # Maximum number of peaks to retrieve in each window.
     num_peaks = 15
-
+    # Maximum frequency to consider when building the constellation map.
+    freq_limit = 440
     constellation_map = []
 
     # Iterate over the time slices
@@ -82,6 +83,7 @@ def build_constellation_map(frequencies, times, stft, fs):
         largest_peaks = np.flip(largest_peaks, axis=None)
         for peak in peaks[largest_peaks]:
             frequency = frequencies[peak]
-            constellation_map.append([times[time_idx]*fs, frequency])
+            if frequency < freq_limit:
+                constellation_map.append([times[time_idx]*fs, frequency])
 
     return constellation_map
