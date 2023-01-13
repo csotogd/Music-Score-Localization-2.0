@@ -11,7 +11,7 @@ class montecarlo_robot_localization:
         length_ref_subset int. This is in seconds. Either the length of the refernece song (if we are to compute it fully) or the size of the
                             subset we are going to consider
         """
-        self.set_of_particles =self.create_initial_set_of_particles(nr_particles, length_ref_initial_subset)
+        self.set_of_particles =self.__create_initial_set_of_particles(nr_particles, length_ref_initial_subset) #these always need to be ordered by time in ascending order
 
     def iterate(self, length_ref, time_diff_snippets):
         """
@@ -22,23 +22,85 @@ class montecarlo_robot_localization:
         time_diff_snippets: time differnece between this snippet and the previous one
 
         """
-        S_prime_k= self.prediction_phase(self, S_k_minus_1=self.set_of_particles, length_ref=length_ref, time_diff_snippets= time_diff_snippets)
-        self.set_of_particles= self.update_phase(S_prime_k)
+        S_prime_k= self.__prediction_phase(self, S_k_minus_1=self.set_of_particles, length_ref=length_ref, time_diff_snippets= time_diff_snippets)
+        self.set_of_particles= self.__update_phase(S_prime_k)
+        self.set_of_particles= np.sort(self.set_of_particles)
 
 
-    def get_most_likely_point:
-        
+    def get_most_likely_point(self, length_intervals, offset_intervals):
         """
+        Computes the most likely point in time of the reference song the musician is in given the current set of particles.
+        This is done by using a sliding interval approach.
+
         Returns
         -------
         the time point in time which is more likely to happen
         """
+        start_idx=0
+        end_idx= 0
+        end_idx= self.__find_next_end_idx(start_idx,end_idx,length_intervals)
+
+        center_intervals=[] #to be indexed at the same time as density_intervals
+        density_intervals=[] #to be indexed at the same time as center_intervals
 
 
-    def create_initial_set_of_particles(self, nr_particles, length_ref_subset):
+        while not (end_idx>=len(self.set_of_particles)-1 and start_idx ==end_idx):
+
+            #first compute density for the current interval and store it
+            density = end_idx -start_idx +1
+            density_intervals.append(density)
+            center = (self.set_of_particles[end_idx] + self.set_of_particles[start_idx])/2
+            center_intervals.append(center)
+
+            #debug
+            print("interval: ", self.set_of_particles[start_idx:end_idx+1])
+            print("center: ",center)
+            print("density: ", density)
+            print()
+
+            #second shift interval by offset_intervals seconds
+            start_idx, end_idx = self.__find_next_interval(start_idx, length_intervals, offset_intervals)
+
+        indx_max_density = np.argmax(density_intervals)
+        return center_intervals[indx_max_density]
+
+
+    """==========================   PRIVATE METHODS FROM HERE ONWARDS  ========================="""
+
+    def __find_next_interval(self, start_indx, length_intervals, offset_intervals):
+        start_indx= self.__find_next_start_idx(start_indx, offset_intervals)
+        end_indx=start_indx
+        end_indx= self.__find_next_end_idx(start_indx, end_indx, length_intervals)
+        return start_indx, end_indx
+
+
+    def __find_next_start_idx(self, start_idx, offset_intervals):
+        previous_start_idx = start_idx
+        while self.set_of_particles[start_idx] - self.set_of_particles[previous_start_idx] < offset_intervals:
+            start_idx += 1
+            if start_idx >= len(self.set_of_particles):
+                start_idx-=1
+                break
+        return start_idx
+
+    def __find_next_end_idx(self, start_idx, end_idx, length_intervals):
+        # move end_index up until we get to n seconds
+        while self.set_of_particles[end_idx] - self.set_of_particles[start_idx] < length_intervals:
+            end_idx += 1
+            if end_idx >= len(self.set_of_particles):
+                end_idx-=1
+                break
+        # once it reaches that bit I need to substract 1 from the end index such that it does not exceed the length we want
+        if self.set_of_particles[end_idx] - self.set_of_particles[start_idx] > length_intervals:
+            end_idx-=1
+        return end_idx
+
+
+
+    def __create_initial_set_of_particles(self, nr_particles, length_ref_subset, initial_time=0):
         """
-        Creates and return an initial set of particles S_0. This is done by uniformly randomly selecting
-        points in time between 0 and the length of the reference song.
+        Creates and return an initial set of particles S_0. This is done by uniformly selecting
+        points in time between the start time and the length of the reference song plus the start time.
         Parameters
         ----------
         nr_particles int
@@ -47,14 +109,14 @@ class montecarlo_robot_localization:
 
         Returns
         -------
-        A list of time points in seconds.
+        a 1d np array of time points in seconds.
         """
 
-        particles = [((random.random()+0) *length_ref_subset) for _ in range(nr_particles)]
+        particles = np.arange(initial_time, initial_time+length_ref_subset, nr_particles)
 
         return particles
 
-    def prediction_phase(self, S_k_minus_1, length_ref, time_diff_snippets):
+    def __prediction_phase(self, S_k_minus_1, length_ref, time_diff_snippets):
         """
         Performs the prediction phase as specified in the paper
         Parameters
@@ -74,17 +136,17 @@ class montecarlo_robot_localization:
 
         for i in range(len(S_k_minus_1)):
             particle = S_k_minus_1[i]
-            probs_x= self.generate_prob_xk_of_prediction_phase(particle, length_ref)
-            new_particle = self.generate_new_particle_prediction_phase(probs_x)
+            probs_x= self.__generate_prob_xk_of_prediction_phase(particle, length_ref)
+            new_particle = self.__generate_new_particle_prediction_phase(probs_x)
             S_prime_k[i]=new_particle
 
         return S_prime_k
 
-    def update_phase(self, S_prime_k):
-        weights_M_k = self.generate_weights_M_k(S_prime_k)
-        return self.generate_new_set_of_particles_update_phase(weights_M_k)
+    def __update_phase(self, S_prime_k):
+        weights_M_k = self.__generate_weights_M_k(S_prime_k)
+        return self.__generate_new_set_of_particles_update_phase(weights_M_k)
 
-    def generate_prob_xk_of_prediction_phase(self, particle,length_ref, length_side=1 ,step_size=0.1):
+    def __generate_prob_xk_of_prediction_phase(self, particle, length_ref, length_side=1, step_size=0.1):
         """
         Here we are calculating the probability of being in a certain point knowing the resulting set of particles in the previous phase and
         not knowing the input at time k. This is the probability distribution that is calculated under the prediction phase of the paper.
@@ -143,7 +205,7 @@ class montecarlo_robot_localization:
         probs_x[:,1] /=sum(probs_x[:,1])
         return probs_x
 
-    def generate_new_particle_prediction_phase(self, probs_x):
+    def __generate_new_particle_prediction_phase(self, probs_x):
         """
         Generates a new particle knowing the probabilities of x given a particle and the previous input. This is part of the prediction phase
 
@@ -173,7 +235,7 @@ class montecarlo_robot_localization:
 
 
 
-    def generate_weights_M_k(self, S_prime_k):
+    def __generate_weights_M_k(self, S_prime_k):
         """
         For each particle calculates the probability of the observation given the particle.
         This is done in the following way:
@@ -205,7 +267,7 @@ class montecarlo_robot_localization:
         return weight_list
 
 
-    def generate_new_set_of_particles_update_phase(self, weights_M_k):
+    def __generate_new_set_of_particles_update_phase(self, weights_M_k):
         """
         Generates a new set of particles, of the same length as the previous one, where the sampling is weighted
         according to the weights previously calculated in the update phase
@@ -268,5 +330,11 @@ if __name__ == '__main__':
     s_k_prime = prediction_phase(S_k_minus_1, length_ref, time_diff_snippets)
     print(s_k_prime)
     """
-    weights_M_k= np.random.random((5,2))
-    generate_new_set_of_particles_update_phase(weights_M_k)
+
+    set_of_particles = np.array([0, 2, 2.5, 3.4, 5.9,6.7, 8.7, 8.9, 9, 9.6])
+    mc = montecarlo_robot_localization(nr_particles=10, length_ref_initial_subset=10)
+    mc.set_of_particles= set_of_particles
+
+    most_likely_time = mc.get_most_likely_point(length_intervals=2, offset_intervals=0.1)
+    print(most_likely_time)
+
