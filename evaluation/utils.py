@@ -7,6 +7,7 @@ sys.path.append(os.getcwd())
 
 
 from Utilities.pipelines import *
+from localization.montecarlo_robot import montecarlo as MC
 
 
 """
@@ -96,6 +97,9 @@ def evaluate_reduced_search_space(
     # calculate constellation map for each
     constellation_ref = sp_pipeline(raw_ref, fs_ref, denoise=False)
 
+    ##TODO instantiate the MC object with the number of particles.
+    #mc = MC.montecarlo_robot_localization(nr_particles=50, length_ref_initial_subset=30)
+
     score = 0
     for time_recording, true_label in recording_labels:
         # get subset of the constellation map
@@ -116,6 +120,11 @@ def evaluate_reduced_search_space(
         predictions, _ = localization_method(
             constellation_record, const_ref_subset, fs_record
         )
+
+        ##TODO perform the itteration of the montecarlo
+        #mc.iterate(length_ref=30, time_diff_snippets=1, predictions=predictions) #check the time diff snippets, filled with a random value
+        #prediction = mc.get_most_likely_point(length_intervals=2, offset_intervals=0.2)
+        #score_point = evaluate_localization_single(true_label, prediction)
 
         score_point = evaluate_localization(true_label, predictions)
         score += score_point
@@ -275,6 +284,94 @@ def evaluate_localization(
             scores.append(0)
 
     return max(scores)
+
+def evaluate_localization_single(
+    true_label,
+    prediction,
+    interval_side_perfect_length=3,
+    interval_side_relevant_length=2,
+):
+    """
+
+    This functions evaluate how good/bad our estimated localization for one point is. the returned score lies between 0 and 1
+
+    More specifically this function works as follows:
+
+    -   The score will be 1 (the max) if
+        the prediction lies in the interval [true_label +- interval_side_perfect_length]
+
+    -   The score will decrease linearly from 1 to 0 in the intervals
+        [ true_label - interval_side_perfect_length - interval_side_relevant_length ]   &
+        [ true_label + interval_side_perfect_length + interval_side_relevant_length ]
+
+    -   The score will be 0 everywhere else
+
+    Here is a drawing of how a score looks like
+
+    1                       -------------------
+    .                      /                     \
+                          /                       \
+    .                    /                         \
+    .                   /                           \
+    0 ------------------                              ......................................
+
+    (vertical axis represents score and horizontal axis represents match)
+
+    x axis:            a    b
+
+    where b = true_label - interval_side_perfect_length
+          a =  true_label - interval_side_perfect_length - interval_side_relevant_length
+
+
+    Parameters
+    ----------
+    true_label: float which represents the time in seconds of the ideal match. (our ground truth)
+    prediction: float which represents the time in seconds of the predicted time at which the localization happens
+                according to our localization algorithm
+
+    Returns
+    -------
+    float, score of our match, must be between 0 and 1
+    """
+    if len(prediction) == 0:
+        return 0
+    scores = []
+
+    if (
+        true_label - interval_side_perfect_length
+        <= prediction
+        <= true_label + interval_side_perfect_length
+    ):
+        return 1
+
+    elif (
+        true_label - interval_side_perfect_length - interval_side_relevant_length
+        <= prediction
+        <= true_label - interval_side_perfect_length
+    ):
+        distance_from_0_score = prediction - (
+            true_label
+            - interval_side_perfect_length
+            - interval_side_relevant_length
+        )
+        score = distance_from_0_score / interval_side_relevant_length
+        return score
+
+    elif (
+        true_label + interval_side_perfect_length
+        <= prediction
+        <= true_label + interval_side_perfect_length + interval_side_relevant_length
+    ):
+        distance_from_0_score = (
+            true_label
+            + interval_side_perfect_length
+            + interval_side_relevant_length
+        ) - prediction
+        score = distance_from_0_score / interval_side_relevant_length
+        return score
+
+    else:
+        return 0
 
 
 def get_song_interval(raw_recording, time_recording, fs, length_sec=3):
