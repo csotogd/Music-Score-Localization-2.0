@@ -249,8 +249,6 @@ class montecarlo_robot_localization:
         return new_particle
 
 
-
-
     def __generate_weights_M_k(self, S_prime_k, predictions):
         """
         For each particle calculates the probability of the observation given the particle.
@@ -284,6 +282,7 @@ class montecarlo_robot_localization:
             weight_list[:,0]= weight_list[:,0]/sum(weight_list[:,0]) ##TODO this line is causing a NaN value in the weight of the first particle during initialisation
         return weight_list
 
+
     def __get_localization_score(self, particle, predictions):
         """
         Outputs a localisation score for each particle. If a particle lies on a predicted point weight of 1 is applied
@@ -304,9 +303,49 @@ class montecarlo_robot_localization:
         else:
             return 0
 
+    def __get_fuzzy_localization_score(self, particle, predictions, tolerance=1):
+        """
+        Outputs a localisation score for each particle. Tolerance around the prediction value for which a 1 is still
+        returned as the weight for the particle. Example shown below
+
+                    ____tol____|___tol____
+                    |                     |
+        score       |                     |
+                    |                     |
+         ___________|          /\         |_______________
+                               |
+                            prediction
+
+                          <-time->
+
+        Parameters
+        ----------
+        particle: particle object containing a time and weight
+        predictions: predicted positions from new sensor measurements
+        tolerance: the tolerance to either side of the prediction for which a value of 1 is returned
+
+        Returns
+        -------
+        a score between 1 and 0.
+        """
+
+        score = 0
+        for prediction in predictions:
+            if abs(prediction - particle) <= tolerance:
+                score += 1
+
+
+
+
     def __get_weighted_localization_score(self, particle, predictions, future_decay = 1):
         """
         Decayed weight of the particles time instance to predicted points
+
+                     /\
+                   /   \
+               a /      \  b  ---- exponential rise (with rate a) and decay (with rate b). future_decay = b/a
+               /         \
+        ______/           \______________________
 
         Parameters
         ----------
@@ -321,7 +360,7 @@ class montecarlo_robot_localization:
         dec_dist = decay_dist.Decay_Dist(future_decay)
         score = 0
         for prediction in predictions:
-            score += dec_dist(prediction - particle[0])
+            score += dec_dist(prediction - particle)
         return score
 
     def __generate_new_set_of_particles_update_phase(self, weights_M_k):
