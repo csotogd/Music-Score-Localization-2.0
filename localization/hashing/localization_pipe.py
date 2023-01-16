@@ -1,6 +1,5 @@
 from localization.hashing.create_hashes import create_hashes
-from localization.hashing.match import match
-from localization.hashing.localize_sample_h import localize_sample_h_old
+from localization.hashing.localize_sample_h import localize_sample_h_old, match
 import time
 
 
