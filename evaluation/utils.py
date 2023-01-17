@@ -308,7 +308,7 @@ def evaluate_localization_single(
 
     Here is a drawing of how a score looks like
 
-    1                       -------------------
+    1                        -------------------
     .                      /                     \
                           /                       \
     .                    /                         \

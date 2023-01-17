@@ -29,10 +29,13 @@ class montecarlo_robot_localization:
         self.set_of_particles= np.sort(self.set_of_particles)
 
 
-    def get_most_likely_point(self, length_intervals, offset_intervals) :
+    def get_most_likely_point(self, length_intervals=0.5, offset_intervals=0.15) :
         """
         Computes the most likely point in time of the reference song the musician is in given the current set of particles.
         This is done by using a sliding interval approach.
+
+
+        offset_intervals: referes to how much we move the sliding interval each time.
 
         Returns
         -------
@@ -49,16 +52,10 @@ class montecarlo_robot_localization:
         while not (end_idx>=len(self.set_of_particles)-1 and start_idx ==end_idx):
 
             #first compute density for the current interval and store it
-            density = end_idx -start_idx +1
+            density = end_idx - start_idx +1
             density_intervals.append(density)
             center = (self.set_of_particles[end_idx] + self.set_of_particles[start_idx])/2
             center_intervals.append(center)
-
-            #debug
-            print("interval: ", self.set_of_particles[start_idx:end_idx+1])
-            print("center: ",center)
-            print("density: ", density)
-            print()
 
             #second shift interval by offset_intervals seconds
             start_idx, end_idx = self.__find_next_interval(start_idx, length_intervals, offset_intervals)
@@ -114,7 +111,7 @@ class montecarlo_robot_localization:
         a 1d np array of time points in seconds.
         """
 
-        particles = np.arange(initial_time, initial_time+length_ref_subset, nr_particles)
+        particles = np.arange(initial_time, initial_time+length_ref_subset, length_ref_subset/nr_particles)
 
         return particles
 
@@ -242,7 +239,7 @@ class montecarlo_robot_localization:
 
         for i in range(len(cum_sum)):
             prob = cum_sum[i]
-            if random_limit>= prob:
+            if prob>= random_limit:
                 new_particle= probs_x[i][0]
                 break
 
@@ -283,10 +280,12 @@ class montecarlo_robot_localization:
         return weight_list
 
 
-    def __get_localization_score(self, particle, predictions):
+    def __get_localization_score(self, particle, predictions, length_center =0.5, length_side=0.25):
         """
-        Outputs a localisation score for each particle. If a particle lies on a predicted point weight of 1 is applied
-        otherwise weight of zero is applied
+        Outputs a localisation score for each particle.
+
+        Score is 1*score in predictions in an interval of length length center where the is one prediction in the center.
+        Then it gets a score of 0.5* score in predictions if it is within 0.5 and 0.25s to the center of the inteval.
 
         Parameters
         ----------
@@ -296,12 +295,23 @@ class montecarlo_robot_localization:
         -------
         a score between 1 and 0.
         """
-        time = np.round(particle, 2)
-        round_predictions = np.round(predictions, 2)
-        if time in round_predictions:
-            return 1
-        else:
-            return 0
+        score = 0
+
+        times_key = (list(predictions.keys()))
+
+        for actual_time in times_key:
+
+            if (particle>actual_time-length_center/2) and (particle< actual_time+length_center/2):
+                score+= predictions[actual_time]* 1
+
+            elif (particle<actual_time-length_center/2) and (particle>actual_time-length_center/2 - length_side):
+                score+= predictions[actual_time]* 0.5
+
+            elif (particle>actual_time+length_center/2) and (particle<actual_time+length_center/2 + length_side):
+                score+= predictions[actual_time] * 0.5
+
+        return score
+
 
     def __get_fuzzy_localization_score(self, particle, predictions, tolerance=1):
         """
@@ -387,7 +397,7 @@ class montecarlo_robot_localization:
         #we will traverse the cum_sum and random_choices_Sorted simultaneously to keep the complexity of he loop linear. (it is O(nlogn) as there was sorting done before)
         idx_cumsum=0
         idx_random_sorted=0
-        while idx_random_sorted< len(random_sorted):
+        while idx_random_sorted< len(random_sorted) and idx_cumsum<len(cum_sum):
             random_sorted_value = random_sorted[idx_random_sorted]
 
             if idx_cumsum==0:#base case, done separately to avoid index out of bounds error
@@ -427,10 +437,39 @@ if __name__ == '__main__':
     print(s_k_prime)
     """
 
+    """
     set_of_particles = np.array([0, 2, 2.5, 3.4, 5.9,6.7, 8.7, 8.9, 9, 9.6])
     mc = montecarlo_robot_localization(nr_particles=10, length_ref_initial_subset=10)
     mc.set_of_particles= set_of_particles
 
     most_likely_time = mc.get_most_likely_point(length_intervals=2, offset_intervals=0.1)
     print(most_likely_time)
+    """
+
+    """
+        predictions = {0.1:1, 0.2:1, 0.7: 3, 0.83:2, 3.2: 1, 4.1: 7, 5: 3, 7.5: 1}
+        for particle in [0, 0.5,1,1.5, 2, 2.5,3, 3.5,4, 4.5,5, 5.5,6, 6.5,7, 7.5,8]:
+            score = mc.get_localization_score(particle, predictions)
+            print("particle: ", particle, " ------> score: ", score)
+    """
+    length_ref = 30
+    time_step = 3
+    #we are goin to simulate an iteration without taking the hashing/panako part into account to see how th emthod performs
+    mc = montecarlo_robot_localization(nr_particles=1000, length_ref_initial_subset=length_ref)
+
+
+
+    for i in range(20):
+        print(i)
+        #create random prediction dict
+        times = list(np.random.rand(100)* length_ref+ time_step*i)
+        scores = list(np.random.rand(100)*4)
+        predictions= dict(zip(times, scores))
+
+        mc.iterate(length_ref=length_ref,predictions= predictions, time_diff_snippets=3)
+        mc.get_most_likely_point()
+        print("mean of particles: ", mc.set_of_particles.mean())
+        print("std of particles: ", mc.set_of_particles.std())
+
+
 

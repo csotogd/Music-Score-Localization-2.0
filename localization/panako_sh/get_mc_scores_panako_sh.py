@@ -19,7 +19,7 @@ def match(sample_hash_array: np.ndarray, song_hash_array: np.ndarray):
 
 
 def get_mc_scores_panako_sh(
-    sample_constellation_map: list, song_constellation_map: list, sample_freq=1
+    sample_constellation_map: list, song_constellation_map: list, ref_freq=1
 ):
 
     if global_hashes.song_array is None:
@@ -34,7 +34,7 @@ def get_mc_scores_panako_sh(
 
     sample_array, _ = create_hashes(sample_constellation_map)
     scores = match(sample_array, song_array)
-    mc_scores = {song_idx_dict[i] / sample_freq: scores[i] for i in scores}
+    mc_scores = {song_idx_dict[i] / ref_freq: scores[i] for i in scores}
 
     # print("match found with seconds: ", matching_times)
 
