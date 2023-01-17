@@ -21,12 +21,12 @@ from localization.panako_h.localize_sample_panako_h import localize_sample_panak
 sys.path.append(os.getcwd())
 
 METHODS = [
-    localize_sample_d,
-    localize_sample_h,
+    # localize_sample_d,
+    # localize_sample_h,
     localize_sample_sh,
-    localize_sample_sh_new,
-    localize_sample_panako_sh,
-    localize_sample_panako_h,
+    # localize_sample_sh_new,
+    # localize_sample_panako_sh,
+    # localize_sample_panako_h,
 ]
 
 # Fs_ref, ref_song = read(
@@ -186,6 +186,6 @@ if __name__ == "__main__":
 
     for method in METHODS:
         evaluation_main(
-            evaluation_method=evaluate_reduced_search_space,
+            evaluation_method=evaluate,
             localization_method=method,
         )

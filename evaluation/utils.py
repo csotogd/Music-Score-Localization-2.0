@@ -57,7 +57,7 @@ def evaluate(
         constellation_record = sp_pipeline(recording_interval, fs_record, denoise=True)
 
         predictions, _ = localization_method(
-            constellation_record, constellation_ref, fs_record
+            constellation_record, constellation_ref
         )
 
         score_point = evaluate_localization(true_label, predictions)
@@ -120,7 +120,7 @@ def evaluate_reduced_search_space(
         constellation_record = sp_pipeline(recording_interval, fs_record, denoise=True)
 
         predictions, _ = localization_method(
-            constellation_record, const_ref_subset, fs_record
+            constellation_record, const_ref_subset
         )
 
         ##TODO perform the itteration of the montecarlo
@@ -177,14 +177,14 @@ def get_fraction_of_ref_song(
     # The constellation map is a list of tuples ordered by time, hence finding a time interval in it can be done in linear time
     # We will compute a subset as close as possible to the target one. In case of disambiguation we make the subset smaller.
     for i in range(len(ref_song_cons_map)):
-        obs = ref_song_cons_map[i][0]
+        obs = ref_song_cons_map[i][0] * fs_ref
         if obs >= desired_obs_start:
             index_start = i
             break
 
     index_end = None
     for i in range(index_start, len(ref_song_cons_map)):
-        obs = ref_song_cons_map[i][0]
+        obs = ref_song_cons_map[i][0] * fs_ref
         if obs >= desired_obs_end:
             index_end = i
             break
