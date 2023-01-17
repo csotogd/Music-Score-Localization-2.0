@@ -1,13 +1,15 @@
+import time
+
 # Append root to path
 import sys
 import os
-import time
 
 sys.path.append(os.getcwd())
 
 
 from Utilities.pipelines import *
-from localization.montecarlo_robot import montecarlo as MC
+
+# from localization.montecarlo_robot import montecarlo as MC
 
 
 """
@@ -98,7 +100,7 @@ def evaluate_reduced_search_space(
     constellation_ref = sp_pipeline(raw_ref, fs_ref, denoise=False)
 
     ##TODO instantiate the MC object with the number of particles.
-    #mc = MC.montecarlo_robot_localization(nr_particles=50, length_ref_initial_subset=30)
+    # mc = MC.montecarlo_robot_localization(nr_particles=50, length_ref_initial_subset=30)
 
     score = 0
     for time_recording, true_label in recording_labels:
@@ -122,9 +124,9 @@ def evaluate_reduced_search_space(
         )
 
         ##TODO perform the itteration of the montecarlo
-        #mc.iterate(length_ref=30, time_diff_snippets=1, predictions=predictions) #check the time diff snippets, filled with a random value
-        #prediction = mc.get_most_likely_point(length_intervals=2, offset_intervals=0.2)
-        #score_point = evaluate_localization_single(true_label, prediction)
+        # mc.iterate(length_ref=30, time_diff_snippets=1, predictions=predictions) #check the time diff snippets, filled with a random value
+        # prediction = mc.get_most_likely_point(length_intervals=2, offset_intervals=0.2)
+        # score_point = evaluate_localization_single(true_label, prediction)
 
         score_point = evaluate_localization(true_label, predictions)
         score += score_point
@@ -285,6 +287,7 @@ def evaluate_localization(
 
     return max(scores)
 
+
 def evaluate_localization_single(
     true_label,
     prediction,
@@ -350,9 +353,7 @@ def evaluate_localization_single(
         <= true_label - interval_side_perfect_length
     ):
         distance_from_0_score = prediction - (
-            true_label
-            - interval_side_perfect_length
-            - interval_side_relevant_length
+            true_label - interval_side_perfect_length - interval_side_relevant_length
         )
         score = distance_from_0_score / interval_side_relevant_length
         return score
@@ -363,9 +364,7 @@ def evaluate_localization_single(
         <= true_label + interval_side_perfect_length + interval_side_relevant_length
     ):
         distance_from_0_score = (
-            true_label
-            + interval_side_perfect_length
-            + interval_side_relevant_length
+            true_label + interval_side_perfect_length + interval_side_relevant_length
         ) - prediction
         score = distance_from_0_score / interval_side_relevant_length
         return score

@@ -1,5 +1,4 @@
-from localization.direct_comparison.create_tuples import create_tuples
-from localization.direct_comparison.match import match
+from localization.direct_comparison.utils import *
 
 
 class global_hashes:
@@ -8,7 +7,7 @@ class global_hashes:
 
 
 def localize_sample_d(
-    sample_constellation_map: list, song_constellation_map: list, sample_freq=1
+    sample_constellation_map: list, song_constellation_map: list, sample_fs=1, song_fs=1
 ):
     """
     A function to perform sample localization. The function first
@@ -24,7 +23,7 @@ def localize_sample_d(
     """
 
     if global_hashes.song_array is None:
-        song_array, song_idx_dict = create_tuples(song_constellation_map)
+        song_array, song_idx_dict = create_tuples(song_constellation_map, song_fs)
         global_hashes.song_array = song_array
         global_hashes.song_idx_dict = song_idx_dict
         print("created new song tuples")
@@ -33,9 +32,9 @@ def localize_sample_d(
         song_array = global_hashes.song_array
         song_idx_dict = global_hashes.song_idx_dict
 
-    sample_array, _ = create_tuples(sample_constellation_map)
+    sample_array, _ = create_tuples(sample_constellation_map, sample_fs)
     matching_indices, matching_score = match(sample_array, song_array)
-    matching_times = [song_idx_dict[i] / sample_freq for i in matching_indices]
+    matching_times = [song_idx_dict[i] for i in matching_indices]
 
     print("match found with seconds: ", matching_times)
 

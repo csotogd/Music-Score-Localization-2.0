@@ -1,5 +1,5 @@
 import numpy as np
-from localization.sliding_hashes.create_hashes import create_hashes
+from localization.sliding_hashes.utils import create_hashes
 
 
 class global_hashes:
