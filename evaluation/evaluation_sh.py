@@ -83,11 +83,6 @@ def evaluate_reduced_search_space(
     # calculate constellation map for each
     constellation_ref = sp_pipeline(raw_ref, fs_ref, denoise=False)
 
-<<<<<<< Updated upstream:evaluation/evaluation_sh.py
-=======
-    ##TODO instantiate the MC object with the number of particles.
-    mc = MC.montecarlo_robot_localization(nr_particles=50, length_ref_initial_subset=30)
->>>>>>> Stashed changes:evaluation/utils.py
 
     score = 0
     for time_recording, true_label in recording_labels:
@@ -106,16 +101,7 @@ def evaluate_reduced_search_space(
             constellation_record, const_ref_subset, fs_record
         )
 
-<<<<<<< Updated upstream:evaluation/evaluation_sh.py
         score_point = evaluate_localization(true_label, predictions)
-=======
-        ##TODO perform the iteration of the montecarlo
-        mc.iterate(length_ref=30, time_diff_snippets=1, predictions=predictions) #check the time diff snippets, filled with a random value
-        prediction = mc.get_most_likely_point(length_intervals=2, offset_intervals=0.2)
-        score_point = evaluate_localization_single(true_label, prediction)
-
-        #score_point = evaluate_localization(true_label, predictions)
->>>>>>> Stashed changes:evaluation/utils.py
         score += score_point
 
     score_normalized = score / len(recording_labels)
