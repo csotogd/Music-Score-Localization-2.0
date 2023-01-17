@@ -36,7 +36,7 @@ def localization_pipeline(
     matches = match(snippet_hashes, song_hashes)
 
     match_time = localize_sample_h_old(matches, sample_freq)
-    print("match found with second: ", match_time)
+    #print("match found with second: ", match_time)
     return match_time
 
 

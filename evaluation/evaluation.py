@@ -60,22 +60,25 @@ all_paths = [
     ("../data/Clair_de_lune_original_1channel.wav",
      "../data/claire_de_lune_record1_kris_1channel.wav",
      "../data/labelled_data/claire_de_lune_record1_kris.txt"
-     ),
-
-    ("../data/bach_prelude_c_major/Bach_prelude_original_1channel.wav",
-     "../data/bach_prelude_c_major/mic/BAch_prelude_Background_plus_mistake_1_channel.wav",
-     "../data/labelled_data/BAch_prelude_Background_plus_mistake_1_channel.txt"
-     ),
-
-    ("../data/bach_prelude_c_major/Bach_prelude_original_1channel.wav",
-     "../data/bach_prelude_c_major/mic/Bach_prelude_first_version_1channel.wav",
-     "../data/labelled_data/Bach_prelude_first_version_1channel.txt"
-     ),
-
-    ("../data/bach_prelude_c_major/Bach_prelude_original_1channel.wav",
-     "../data/bach_prelude_c_major/mic/Bach_prelude_second_version_1channel.wav",
-     "../data/labelled_data/Bach_prelude_second_version_1channel.txt"
      )
+    # ,
+
+    # ("../data/bach_prelude_c_major/Bach_prelude_original_1channel.wav",
+    #  "../data/bach_prelude_c_major/mic/BAch_prelude_Background_plus_mistake_1_channel.wav",
+    #  "../data/labelled_data/BAch_prelude_Background_plus_mistake_1_channel.txt"
+    #  )
+    #  ,
+    #
+    # ("../data/bach_prelude_c_major/Bach_prelude_original_1channel.wav",
+    #  "../data/bach_prelude_c_major/mic/Bach_prelude_first_version_1channel.wav",
+    #  "../data/labelled_data/Bach_prelude_first_version_1channel.txt"
+    #  )
+    #  ,
+    #
+    # ("../data/bach_prelude_c_major/Bach_prelude_original_1channel.wav",
+    #  "../data/bach_prelude_c_major/mic/Bach_prelude_second_version_1channel.wav",
+    #  "../data/labelled_data/Bach_prelude_second_version_1channel.txt"
+    #  )
 ]
 
 length_snippets_in_secs = [3, 5, 10]
@@ -134,7 +137,7 @@ def evaluation_main(evaluation_method, localization_method):
         print(f"Starting for: {path_rec}")
         start_time = time.time()
         scores = []
-        labelled_data = get_labeled_data("../data/claire_de_lune_record1_perfect.txt")
+        labelled_data = get_labeled_data(path_labels) ##TODO need to add the labels here to themselves for the self eval
 
         for i in range(len(labelled_data)):
             labelled_data[i] = (labelled_data[i][1], labelled_data[i][1])
