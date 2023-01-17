@@ -8,6 +8,9 @@ sys.path.append(os.getcwd())
 from localization.direct_comparison.localize_sample_d import localize_sample_d
 from localization.hashing.localize_sample_h import localize_sample_h
 from localization.sliding_hashes.localize_sample_sh import localize_sample_sh
+from localization.sliding_hashes_new.localize_sample_sh_new import (
+    localize_sample_sh_new,
+)
 from localization.panako_sh.localize_sample_panako_sh import localize_sample_panako_sh
 from localization.panako_h.localize_sample_panako_h import localize_sample_panako_h
 
@@ -15,6 +18,7 @@ METHODS = [
     localize_sample_d,
     localize_sample_h,
     localize_sample_sh,
+    localize_sample_sh_new,
     localize_sample_panako_sh,
     localize_sample_panako_h,
 ]
@@ -26,10 +30,10 @@ from random_constellations import random_constellations
 import time
 
 # Constants for random testing
-SONG_LENGTH = 10_000  # 132_300, 220_500, 441_000
-SAMPLE_LENGTH = 100  # 2004, 35, 125, 501, 2004, 3371
+SONG_LENGTH = 10_000  # 132_300  # 220_500, 441_000
+SAMPLE_LENGTH = 100  # 2004  # 35, 125, 501, 2004, 3371
 NOISE_VAR = 3
-ERROR_MARGIN = 5
+ERROR_MARGIN = 2
 
 
 def random_test(method):
@@ -39,12 +43,13 @@ def random_test(method):
         idx,
         origin,
     ) = random_constellations(
-        song_length=SONG_LENGTH, sample_length=SAMPLE_LENGTH, noise_var=NOISE_VAR
+        song_length=SONG_LENGTH,
+        sample_length=SAMPLE_LENGTH,
+        noise_var=NOISE_VAR,
     )
 
     print()
     print("Match testing")
-    print()
     print()
     print("Part sampled from constellation map (first 10 tuples):")
     print(song_constellation_map[idx : idx + 10])
@@ -77,4 +82,4 @@ def random_test(method):
 
 
 if __name__ == "__main__":
-    random_test(method=localize_sample_h)
+    random_test(method=localize_sample_sh_new)

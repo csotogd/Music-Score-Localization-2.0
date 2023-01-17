@@ -84,6 +84,6 @@ def build_constellation_map(frequencies, times, stft, fs):
         for peak in peaks[largest_peaks]:
             frequency = frequencies[peak]
             if frequency < freq_limit:
-                constellation_map.append([times[time_idx]*fs, frequency])
+                constellation_map.append([times[time_idx], frequency])
 
     return constellation_map

@@ -1,25 +1,13 @@
-from localization.panako_h.utils import *
+from localization.sliding_hashes_new.utils import *
 
 
 class global_hashes:
     song_hashes = None
 
 
-def localize_sample_panako_h(
+def localize_sample_sh_new(
     sample_constellation_map: list, song_constellation_map: list
 ):
-    """
-    A function to perform sample localization. The function first
-    creates the hash arrays from the sample and the song constellation
-    maps and then finds the indices at which they match. The function then
-    looks up the corresponding times in the song index dictionary. The function
-    finally returns:
-        - A list of the times at which the sample is found to match the song.
-            NOTE: Each time in the list is to be interpreted as the STARTING time at
-            which the sample matches the song. To get the CURRENT time, the recording time
-            needs to be added to the time returned by this function.
-        - The matching score for the times in the list.
-    """
 
     if global_hashes.song_hashes is None:
         song_hashes = create_hashes(song_constellation_map)

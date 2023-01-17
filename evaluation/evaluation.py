@@ -12,6 +12,9 @@ from utils import *
 from localization.direct_comparison.localize_sample_d import localize_sample_d
 from localization.hashing.localize_sample_h import localize_sample_h
 from localization.sliding_hashes.localize_sample_sh import localize_sample_sh
+from localization.sliding_hashes_new.localize_sample_sh_new import (
+    localize_sample_sh_new,
+)
 from localization.panako_sh.localize_sample_panako_sh import localize_sample_panako_sh
 from localization.panako_h.localize_sample_panako_h import localize_sample_panako_h
 
@@ -21,6 +24,7 @@ METHODS = [
     localize_sample_d,
     localize_sample_h,
     localize_sample_sh,
+    localize_sample_sh_new,
     localize_sample_panako_sh,
     localize_sample_panako_h,
 ]
@@ -79,6 +83,7 @@ all_paths = [
     #  "../data/bach_prelude_c_major/mic/Bach_prelude_second_version_1channel.wav",
     #  "../data/labelled_data/Bach_prelude_second_version_1channel.txt"
     #  )
+
 ]
 
 length_snippets_in_secs = [3, 5, 10]
