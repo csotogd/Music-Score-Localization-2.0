@@ -6,11 +6,11 @@ class global_hashes:
 
 
 def localize_sample_sh_new(
-    sample_constellation_map: list, song_constellation_map: list, sample_freq=1
+    sample_constellation_map: list, song_constellation_map: list
 ):
 
     if global_hashes.song_hashes is None:
-        song_hashes = create_hashes(song_constellation_map, sample_freq)
+        song_hashes = create_hashes(song_constellation_map)
         global_hashes.song_hashes = song_hashes
         print("created new song hashes")
         print()
@@ -18,13 +18,17 @@ def localize_sample_sh_new(
     else:
         song_hashes = global_hashes.song_hashes
 
-    sample_hashes = create_hashes(sample_constellation_map, sample_freq)
+    sample_hashes = create_hashes(sample_constellation_map)
     matches = match(sample_hashes, song_hashes)
-    matching_score = max(matches.values())
-    matching_times = [
-        time / sample_freq for time in matches if matches[time] == matching_score
-    ]
 
-    # print("match found with seconds: ", matching_times)
+    match_times = []
+    max_matches = 0
 
-    return matching_times, matching_score
+    for time in matches:
+        if matches[time] > max_matches:
+            max_matches = matches[time]
+            match_times = [time]
+        elif matches[time] == max_matches:
+            match_times.append(time)
+
+    return match_times, max_matches

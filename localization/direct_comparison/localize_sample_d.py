@@ -6,9 +6,7 @@ class global_hashes:
     song_idx_dict = None
 
 
-def localize_sample_d(
-    sample_constellation_map: list, song_constellation_map: list, sample_fs=1, song_fs=1
-):
+def localize_sample_d(sample_constellation_map: list, song_constellation_map: list):
     """
     A function to perform sample localization. The function first
     creates the tuple arrays from the sample and the song constellation
@@ -23,19 +21,18 @@ def localize_sample_d(
     """
 
     if global_hashes.song_array is None:
-        song_array, song_idx_dict = create_tuples(song_constellation_map, song_fs)
+        song_array, song_idx_dict = create_tuples(song_constellation_map)
         global_hashes.song_array = song_array
         global_hashes.song_idx_dict = song_idx_dict
         print("created new song tuples")
+        print()
 
     else:
         song_array = global_hashes.song_array
         song_idx_dict = global_hashes.song_idx_dict
 
-    sample_array, _ = create_tuples(sample_constellation_map, sample_fs)
+    sample_array, _ = create_tuples(sample_constellation_map)
     matching_indices, matching_score = match(sample_array, song_array)
     matching_times = [song_idx_dict[i] for i in matching_indices]
-
-    print("match found with seconds: ", matching_times)
 
     return matching_times, matching_score

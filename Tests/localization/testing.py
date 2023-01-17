@@ -33,7 +33,7 @@ import time
 SONG_LENGTH = 10_000  # 132_300  # 220_500, 441_000
 SAMPLE_LENGTH = 100  # 2004  # 35, 125, 501, 2004, 3371
 NOISE_VAR = 3
-ERROR_MARGIN = 5
+ERROR_MARGIN = 2
 
 
 def random_test(method):

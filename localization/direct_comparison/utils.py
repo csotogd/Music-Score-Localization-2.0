@@ -1,7 +1,13 @@
 import numpy as np
 
+TIME_AHEAD = 5
 
-def create_tuples(constellation_map: list, fs=1):
+# A constant that defines the thresholds for comparing two tuples of the form
+# (freq_0, freq_1, td) to account for frequency and time distortion.
+RANGES = np.array((2, 2, 1))
+
+
+def create_tuples(constellation_map: list):
     """
     A function that creates an array containing the tuples
     representing the diagonals in the constellation map.
@@ -22,21 +28,15 @@ def create_tuples(constellation_map: list, fs=1):
 
     arr_ind = 0
     for i, (t_0, freq_0) in enumerate(constellation_map):
-        t_0 /= fs
-        for t_1, freq_1 in constellation_map[i : i + 10]:
-            t_1 /= fs
+        for t_1, freq_1 in constellation_map[i:]:
             td = t_1 - t_0
-
+            if td > TIME_AHEAD:
+                break
             tuples_list.append((freq_0, freq_1, td))
             index_dict[arr_ind] = t_0
             arr_ind += 1
 
     return np.asarray(tuples_list), index_dict
-
-
-# A constant that defines the thresholds for comparing two tuples of the form
-# (freq_0, freq_1, td) to account for frequency and time distortion.
-RANGES = np.array((2, 2, 1))
 
 
 def match(sample_tuples_array: np.ndarray, song_tuples_array: np.ndarray):
