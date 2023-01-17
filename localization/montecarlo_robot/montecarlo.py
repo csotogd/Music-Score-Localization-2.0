@@ -2,6 +2,7 @@ import random
 from numpy import arange
 import numpy as np
 from matplotlib import pyplot as plt
+from localization.decay_distribution import decay_dist
 class montecarlo_robot_localization:
     def __init__(self, nr_particles, length_ref_initial_subset):
         """
@@ -13,21 +14,22 @@ class montecarlo_robot_localization:
         """
         self.set_of_particles =self.__create_initial_set_of_particles(nr_particles, length_ref_initial_subset) #these always need to be ordered by time in ascending order
 
-    def iterate(self, length_ref, time_diff_snippets):
+    def iterate(self, length_ref, time_diff_snippets, predictions):
         """
         Performs one iteration of the montecarlo localization strategy, i.e. updates the set of particles
         Parameters
         ----------
         length_ref: length of the subset/whole reference song used in this iteration
         time_diff_snippets: time differnece between this snippet and the previous one
+        predictions: interpretations of current measurements used to adjust the weights for particles
 
         """
-        S_prime_k= self.__prediction_phase(self, S_k_minus_1=self.set_of_particles, length_ref=length_ref, time_diff_snippets= time_diff_snippets)
-        self.set_of_particles= self.__update_phase(S_prime_k)
+        S_prime_k= self.__prediction_phase(S_k_minus_1=self.set_of_particles, length_ref=length_ref, time_diff_snippets= time_diff_snippets)
+        self.set_of_particles= self.__update_phase(S_prime_k, predictions)
         self.set_of_particles= np.sort(self.set_of_particles)
 
 
-    def get_most_likely_point(self, length_intervals, offset_intervals):
+    def get_most_likely_point(self, length_intervals, offset_intervals) :
         """
         Computes the most likely point in time of the reference song the musician is in given the current set of particles.
         This is done by using a sliding interval approach.
@@ -142,8 +144,22 @@ class montecarlo_robot_localization:
 
         return S_prime_k
 
-    def __update_phase(self, S_prime_k):
-        weights_M_k = self.__generate_weights_M_k(S_prime_k)
+    def __update_phase(self, S_prime_k, predictions):
+        """
+        Update Phase of the monte carlo approach, updates the weights according to new sensor measurements and generates
+         a new set of particles
+
+        Parameters
+        ----------
+        S_prime_k: set of particles calculated in prediction phase. 2d np array of floats
+        predictions: predicted positions from new sensor measurements
+        Returns
+        -------
+        np array of floats of dimensions (N,2), where N represents the number of particles.
+        [i,0] accesses the weight of particle i
+        [i,1] accesses the time of particle 1
+        """
+        weights_M_k = self.__generate_weights_M_k(S_prime_k, predictions)
         return self.__generate_new_set_of_particles_update_phase(weights_M_k)
 
     def __generate_prob_xk_of_prediction_phase(self, particle, length_ref, length_side=1, step_size=0.1):
@@ -233,9 +249,7 @@ class montecarlo_robot_localization:
         return new_particle
 
 
-
-
-    def __generate_weights_M_k(self, S_prime_k):
+    def __generate_weights_M_k(self, S_prime_k, predictions):
         """
         For each particle calculates the probability of the observation given the particle.
         This is done in the following way:
@@ -246,6 +260,7 @@ class montecarlo_robot_localization:
         Parameters
         ----------
         S_prime_k: set of particles calculated in prediction phase. 2d np array of floats
+        predictions: predicted positions from new sensor measurements
 
         Returns
         -------
@@ -259,13 +274,94 @@ class montecarlo_robot_localization:
         for i in range(len(S_prime_k)):
             particle = S_prime_k[i]
             #get localization score for that particle time
-            weight= get_localization_score(time= particle) #TODO: integrate with panako part
+            weight= self.__get_localization_score(particle=particle, predictions=predictions) #TODO: integrate with panako part
             weight_list[i, 0]= weight
 
         #normalize scores
-        weight_list[:,0]= weight_list[:,0]/sum(weight_list[:,0])
+        if np.sum(weight_list[:,0]) != 0:
+            weight_list[:,0]= weight_list[:,0]/sum(weight_list[:,0]) ##TODO this line is causing a NaN value in the weight of the first particle during initialisation
         return weight_list
 
+
+    def __get_localization_score(self, particle, predictions):
+        """
+        Outputs a localisation score for each particle. If a particle lies on a predicted point weight of 1 is applied
+        otherwise weight of zero is applied
+
+        Parameters
+        ----------
+        particle: particle object containing a time and weight
+        predictions: predicted positions from new sensor measurements
+        Returns
+        -------
+        a score between 1 and 0.
+        """
+        time = np.round(particle, 2)
+        round_predictions = np.round(predictions, 2)
+        if time in round_predictions:
+            return 1
+        else:
+            return 0
+
+    def __get_fuzzy_localization_score(self, particle, predictions, tolerance=1):
+        """
+        Outputs a localisation score for each particle. Tolerance around the prediction value for which a 1 is still
+        returned as the weight for the particle. Example shown below
+
+                    ____tol____|___tol____
+                    |                     |
+        score       |                     |
+                    |                     |
+         ___________|          /\         |_______________
+                               |
+                            prediction
+
+                          <-time->
+
+        Parameters
+        ----------
+        particle: particle object containing a time and weight
+        predictions: predicted positions from new sensor measurements
+        tolerance: the tolerance to either side of the prediction for which a value of 1 is returned
+
+        Returns
+        -------
+        a score between 1 and 0.
+        """
+
+        score = 0
+        for prediction in predictions:
+            if abs(prediction - particle) <= tolerance:
+                score += 1
+
+
+
+
+    def __get_weighted_localization_score(self, particle, predictions, future_decay = 1):
+        """
+        Decayed weight of the particles time instance to predicted points
+
+                     /\
+                   /   \
+               a /      \  b  ---- exponential rise (with rate a) and decay (with rate b). future_decay = b/a
+               /         \
+        ______/           \______________________
+
+        Parameters
+        ----------
+        particle: particle object containing a time and weight
+        predictions: predicted positions from new sensor measurements
+        future_decay: decay factor of future predictions to past predictions
+
+        Returns
+        -------
+        weight as sum of the decayed weights from all predictions to the particle time.
+        """
+        dec_dist = decay_dist.Decay_Dist(future_decay)
+        score = 0
+        for prediction in predictions:
+            score += dec_dist(prediction - particle)
+        return score
 
     def __generate_new_set_of_particles_update_phase(self, weights_M_k):
         """
@@ -302,7 +398,7 @@ class montecarlo_robot_localization:
                 else:
                     idx_cumsum+=1
             else:
-
+                ##TODO suspected index out of bounds error, when cum_sum array is size 1*2 (seen during initialisation) still present. Seems to have been accounted for before but not working
                 if random_sorted_value> cum_sum[idx_cumsum-1] and random_sorted_value<= cum_sum[idx_cumsum]:
                     new_particle = weights_M_k[idx_cumsum, 1]
                     new_set_particles[idx_random_sorted] = new_particle

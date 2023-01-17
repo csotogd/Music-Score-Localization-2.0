@@ -1,5 +1,5 @@
 import numpy as np
-from localization.sliding_hashes.create_hashes import create_hashes
+from localization.panako_sh.create_hashes import create_hashes
 
 
 class global_hashes:
@@ -31,7 +31,7 @@ def match(sample_hash_array: np.ndarray, song_hash_array: np.ndarray):
     return indices, max_score / sample_len
 
 
-def localize_sample_sh(
+def localize_sample_panako_sh(
     sample_constellation_map: list, song_constellation_map: list, sample_freq=1
 ):
     """

@@ -1,4 +1,11 @@
-def match(snippet_hashes, song_hashes):
+from localization.panako_h.create_hashes import create_hashes
+
+
+class global_hashes:
+    song_hashes = None
+
+
+def match(sample_hashes, song_hashes):
 
     """
     This function is in charge of computing matches between hashes of a snippet recorded by
@@ -16,7 +23,7 @@ def match(snippet_hashes, song_hashes):
 
     """We iterate over hashes computed over the song snippet recorded by the microphone;
     _ are the snippet time points, which are not needed"""
-    for hash, _ in snippet_hashes.items():
+    for hash, _ in sample_hashes.items():
 
         """If the hash currently being evaluated is also found in the hashes of the original song
         it means we have two matching diagonals in the song constellation map and snippet
@@ -36,3 +43,43 @@ def match(snippet_hashes, song_hashes):
                 matches[source_time] += 1
 
     return matches
+
+
+def localize_sample_panako_h(
+    sample_constellation_map: list, song_constellation_map: list, sample_freq=1
+):
+    """
+    A function to perform sample localization. The function first
+    creates the hash arrays from the sample and the song constellation
+    maps and then finds the indices at which they match. The function then
+    looks up the corresponding times in the song index dictionary. The function
+    finally returns:
+        - A list of the times at which the sample is found to match the song.
+            NOTE: Each time in the list is to be interpreted as the STARTING time at
+            which the sample matches the song. To get the CURRENT time, the recording time
+            needs to be added to the time returned by this function.
+        - The matching score for the times in the list.
+    """
+
+    if global_hashes.song_hashes is None:
+        song_hashes = create_hashes(song_constellation_map)
+        global_hashes.song_hashes = song_hashes
+        print("created new song hashes")
+
+    else:
+        song_hashes = global_hashes.song_hashes
+
+    sample_hashes = create_hashes(sample_constellation_map)
+    matches = match(sample_hashes, song_hashes)
+
+    match_times = []
+    max_matches = 0
+
+    for time in matches:
+        if matches[time] > max_matches:
+            max_matches = matches[time]
+            match_times = [time / sample_freq]
+        elif matches[time] == max_matches:
+            match_times.append(time / sample_freq)
+
+    return match_times, max_matches
