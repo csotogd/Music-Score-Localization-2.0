@@ -161,15 +161,13 @@ def get_fraction_of_ref_song(
     seconds_start = indication_time - length_subset / 2
     seconds_end = indication_time + length_subset / 2
     # now we check for edge cases
-    if (
-        length_subset - (seconds_end - seconds_start)
-    ) > 0.1:  # the interval is not of desired length
-        if seconds_start < 0:  # we are at the beginning of the song
-            seconds_start = 0
-            seconds_end = length_subset
-        else:  # we are at the end.
-            seconds_end = length_seconds_ref_song
-            seconds_start = seconds_end - length_subset
+
+    if seconds_start < 0:  # we are at the beginning of the song
+        seconds_start = 0
+        seconds_end = length_subset
+    elif seconds_end > length_seconds_ref_song:  # we are at the end.
+        seconds_end = length_seconds_ref_song
+        seconds_start = seconds_end - length_subset
 
     desired_obs_start = seconds_start * fs_ref
     desired_obs_end = seconds_end * fs_ref
@@ -282,7 +280,13 @@ def evaluate_localization(
 
         else:
             scores.append(0)
-
+    """
+    print()
+    print("True Label: ", true_label)
+    for i in range(len(predictions)):
+        print(predictions[i], scores[i])
+    print()
+    """
     return max(scores)
 
 def evaluate_localization_single(

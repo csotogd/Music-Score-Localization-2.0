@@ -104,7 +104,7 @@ def evaluation_main(evaluation_method, localization_method):
     print("----------COMPARING A SONG TO ITSELF--------")
     scores = []
     for path_rec, path_labels in paths:
-        labelled_data = get_labeled_data(path_labels)
+        labelled_data = get_labeled_data("../data/claire_de_lune_record1_perfect.txt")
         for i in range(len(labelled_data)):
             labelled_data[i] = (labelled_data[i][1], labelled_data[i][1])
         Fs_record, record_song = read(path_rec)
