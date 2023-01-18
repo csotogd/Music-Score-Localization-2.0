@@ -115,11 +115,17 @@ def evaluate_reduced_search_space(
         recording_interval = get_song_interval(
             raw_recording, time_recording, fs_record, length_sec=length_snippet_secs
         )
+
         constellation_record = sp_pipeline(recording_interval, fs_record, denoise=True)
+
 
         predictions, _ = localization_method(
             constellation_record, const_ref_subset, fs_record
         )
+
+        # print("Constref: " + str(const_ref_subset[0][0] / fs_record))
+        # print("Constref end: " + str(const_ref_subset[-1][0] / fs_record))
+        # print("Prediction:" + str(predictions))
 
         ##TODO perform the itteration of the montecarlo
         #mc.iterate(length_ref=30, time_diff_snippets=1, predictions=predictions) #check the time diff snippets, filled with a random value
@@ -280,13 +286,10 @@ def evaluate_localization(
 
         else:
             scores.append(0)
-    """
-    print()
-    print("True Label: ", true_label)
-    for i in range(len(predictions)):
-        print(predictions[i], scores[i])
-    print()
-    """
+    # print("True Label: ", true_label)
+    # for i in range(len(predictions)):
+    #     print(predictions[i], scores[i])
+    # print()
     return max(scores)
 
 def evaluate_localization_single(

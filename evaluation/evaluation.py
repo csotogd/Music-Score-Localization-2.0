@@ -18,11 +18,11 @@ from localization.panako_h.localize_sample_panako_h import localize_sample_panak
 sys.path.append(os.getcwd())
 
 METHODS = [
-    localize_sample_d,
-    localize_sample_h,
+    # localize_sample_d,
+    # localize_sample_h,
     localize_sample_sh,
-    localize_sample_panako_sh,
-    localize_sample_panako_h,
+    # localize_sample_panako_sh,
+    # localize_sample_panako_h,
 ]
 
 # Fs_ref, ref_song = read(
@@ -56,7 +56,7 @@ All paths and their respective:
 """
 
 all_paths = [
-
+    #
     ("../data/Clair_de_lune_original_1channel.wav",
      "../data/claire_de_lune_record1_kris_1channel.wav",
      "../data/labelled_data/claire_de_lune_record1_kris.txt"
@@ -87,49 +87,49 @@ length_snippets_in_secs = [3, 5, 10]
 def evaluation_main(evaluation_method, localization_method):
     print(f"Evaluation method: {evaluation_method.__name__}")
     print(f"Localization method: {localization_method.__name__}")
-
-    for path_ref, path_rec, path_labels in all_paths:
-
-        print(f"Starting for: {path_rec}")
-
-        start_time = time.time()
-        scores = []
-
-        labelled_data = get_labeled_data(path_labels)
-        Fs_record, record_song = read(path_rec)
-        Fs_ref, ref_song = read(path_ref)
-
-        # for each song try different lengths of snippets:
-        for length_snippet in length_snippets_in_secs:
-            score = evaluation_method(
-                localization_method=localization_method,
-                raw_ref=ref_song,
-                fs_ref=Fs_ref,
-                raw_recording=record_song,
-                fs_record=Fs_record,
-                recording_labels=labelled_data,
-                length_snippet_secs=length_snippet,
-            )
-
-            print("done with snippets of length: ", length_snippet)
-            scores.append(score)
-
-        print(f"Done with {path_rec}\n")
-
-        end_time = time.time()
-        print(f"Total time taken: {end_time - start_time}\n")
-
-        print("----------------EVALUATION RESULTS ---------------------")
-        for j in range(len(length_snippets_in_secs)):
-            print(
-                "score for ",
-                path_rec,
-                " and snippet of ",
-                length_snippets_in_secs[j],
-                " seconds ---->",
-                scores[j]
-            )
-        print("\n")
+    #
+    # for path_ref, path_rec, path_labels in all_paths:
+    #
+    #     print(f"Starting for: {path_rec}")
+    #
+    #     start_time = time.time()
+    #     scores = []
+    #
+    #     labelled_data = get_labeled_data(path_labels)
+    #     Fs_record, record_song = read(path_rec)
+    #     Fs_ref, ref_song = read(path_ref)
+    #
+    #     # for each song try different lengths of snippets:
+    #     for length_snippet in length_snippets_in_secs:
+    #         score = evaluation_method(
+    #             localization_method=localization_method,
+    #             raw_ref=ref_song,
+    #             fs_ref=Fs_ref,
+    #             raw_recording=record_song,
+    #             fs_record=Fs_record,
+    #             recording_labels=labelled_data,
+    #             length_snippet_secs=length_snippet,
+    #         )
+    #
+    #         print("done with snippets of length: ", length_snippet)
+    #         scores.append(score)
+    #
+    #     print(f"Done with {path_rec}\n")
+    #
+    #     end_time = time.time()
+    #     print(f"Total time taken: {end_time - start_time}\n")
+    #
+    #     print("----------------EVALUATION RESULTS ---------------------")
+    #     for j in range(len(length_snippets_in_secs)):
+    #         print(
+    #             "score for ",
+    #             path_rec,
+    #             " and snippet of ",
+    #             length_snippets_in_secs[j],
+    #             " seconds ---->",
+    #             scores[j]
+    #         )
+    #     print("\n")
 
     print("----------COMPARING A SONG TO ITSELF--------")
     for path_ref, path_rec, path_labels in all_paths:
