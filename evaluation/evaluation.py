@@ -1,7 +1,10 @@
+import time
+
 # Append root to path
 import sys
 import os
-import time
+
+sys.path.append(os.getcwd())
 
 from Utilities.pipelines import *
 from scipy.io.wavfile import read
@@ -17,8 +20,6 @@ from localization.sliding_hashes_new.localize_sample_sh_new import (
 )
 from localization.panako_sh.localize_sample_panako_sh import localize_sample_panako_sh
 from localization.panako_h.localize_sample_panako_h import localize_sample_panako_h
-
-sys.path.append(os.getcwd())
 
 METHODS = [
     # localize_sample_d,
@@ -60,13 +61,12 @@ All paths and their respective:
 """
 
 all_paths = [
-
-    ("../data/Clair_de_lune_original_1channel.wav",
-     "../data/claire_de_lune_record1_kris_1channel.wav",
-     "../data/labelled_data/claire_de_lune_record1_kris.txt"
-     )
+    (
+        "./data/Clair_de_lune_original_1channel.wav",
+        "./data/claire_de_lune_record1_kris_1channel.wav",
+        "./data/labelled_data/claire_de_lune_record1_kris.txt",
+    )
     # ,
-
     # ("../data/bach_prelude_c_major/Bach_prelude_original_1channel.wav",
     #  "../data/bach_prelude_c_major/mic/BAch_prelude_Background_plus_mistake_1_channel.wav",
     #  "../data/labelled_data/BAch_prelude_Background_plus_mistake_1_channel.txt"
@@ -83,7 +83,6 @@ all_paths = [
     #  "../data/bach_prelude_c_major/mic/Bach_prelude_second_version_1channel.wav",
     #  "../data/labelled_data/Bach_prelude_second_version_1channel.txt"
     #  )
-
 ]
 
 length_snippets_in_secs = [3, 5, 10]
@@ -132,7 +131,7 @@ def evaluation_main(evaluation_method, localization_method):
                 " and snippet of ",
                 length_snippets_in_secs[j],
                 " seconds ---->",
-                scores[j]
+                scores[j],
             )
         print("\n")
 
@@ -142,7 +141,9 @@ def evaluation_main(evaluation_method, localization_method):
         print(f"Starting for: {path_rec}")
         start_time = time.time()
         scores = []
-        labelled_data = get_labeled_data(path_labels) ##TODO need to add the labels here to themselves for the self eval
+        labelled_data = get_labeled_data(
+            path_labels
+        )  ##TODO need to add the labels here to themselves for the self eval
 
         for i in range(len(labelled_data)):
             labelled_data[i] = (labelled_data[i][1], labelled_data[i][1])
@@ -169,7 +170,9 @@ def evaluation_main(evaluation_method, localization_method):
         end_time = time.time()
         print(f"Total time taken: {end_time - start_time}\n")
 
-        print("----------------EVALUATION RESULTS FOR SONG TO ITSELF---------------------")
+        print(
+            "----------------EVALUATION RESULTS FOR SONG TO ITSELF---------------------"
+        )
         for j in range(len(length_snippets_in_secs)):
             print(
                 "score for ",
@@ -177,7 +180,7 @@ def evaluation_main(evaluation_method, localization_method):
                 " and snippet of ",
                 length_snippets_in_secs[j],
                 " seconds ---->",
-                scores[j]
+                scores[j],
             )
         print("\n")
 

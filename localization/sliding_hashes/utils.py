@@ -4,7 +4,7 @@ import numpy as np
 UPPER_FREQ = 23_000
 FREQ_BITS = 10
 TIME_BITS = 12
-TIME_AHEAD = 5
+TIME_AHEAD = 2
 
 
 def create_hashes(constellation_map: list):
@@ -34,11 +34,11 @@ def create_hashes(constellation_map: list):
             if td > TIME_AHEAD:
                 break
 
-            freq_0_bin = int(freq_0 / UPPER_FREQ * (2**FREQ_BITS))
-            freq_1_bin = int(freq_1 / UPPER_FREQ * (2**FREQ_BITS))
-            td_bin = int(td / TIME_AHEAD * (2**TIME_BITS))
+            freq_0_bin = int((freq_0 / UPPER_FREQ) * (2**FREQ_BITS))
+            freq_1_bin = int((freq_1 / UPPER_FREQ) * (2**FREQ_BITS))
+            # td_bin = int((td / TIME_AHEAD) * (2**TIME_BITS))
 
-            hash = freq_0_bin | (freq_1_bin << 10) | (td_bin << 20)
+            hash = freq_0_bin | (freq_1_bin << 10) | (int(td) << 20)
 
             hashes_list.append(hash)
             index_dict[arr_ind] = t_0

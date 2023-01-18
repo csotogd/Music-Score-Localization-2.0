@@ -56,9 +56,7 @@ def evaluate(
         )
         constellation_record = sp_pipeline(recording_interval, fs_record, denoise=True)
 
-        predictions, _ = localization_method(
-            constellation_record, constellation_ref
-        )
+        predictions, _ = localization_method(constellation_record, constellation_ref)
 
         score_point = evaluate_localization(true_label, predictions)
         score += score_point
@@ -119,9 +117,7 @@ def evaluate_reduced_search_space(
         )
         constellation_record = sp_pipeline(recording_interval, fs_record, denoise=True)
 
-        predictions, _ = localization_method(
-            constellation_record, const_ref_subset
-        )
+        predictions, _ = localization_method(constellation_record, const_ref_subset)
 
         ##TODO perform the itteration of the montecarlo
         # mc.iterate(length_ref=30, time_diff_snippets=1, predictions=predictions) #check the time diff snippets, filled with a random value
@@ -282,13 +278,13 @@ def evaluate_localization(
 
         else:
             scores.append(0)
-    """
-    print()
-    print("True Label: ", true_label)
-    for i in range(len(predictions)):
-        print(predictions[i], scores[i])
-    print()
-    """
+
+    # print()
+    # print("True Label: ", true_label)
+    # for i in range(len(predictions)):
+    #     print(predictions[i], scores[i])
+    # print()
+
     return max(scores)
 
 
