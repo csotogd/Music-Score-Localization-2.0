@@ -123,8 +123,8 @@ def evaluate_reduced_search_space(
             constellation_record, const_ref_subset
         )
 
-        print("Constref: " + str(const_ref_subset[0][0] / fs_record))
-        print("Constref end: " + str(const_ref_subset[-1][0] / fs_record))
+        print("Constref: " + str(const_ref_subset[0][0]))
+        print("Constref end: " + str(const_ref_subset[-1][0]))
         print("Prediction:" + str(predictions))
 
         ##TODO perform the itteration of the montecarlo

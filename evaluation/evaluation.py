@@ -23,8 +23,8 @@ sys.path.append(os.getcwd())
 METHODS = [
     # localize_sample_d,
     # localize_sample_h,
-    localize_sample_sh,
-    # localize_sample_sh_new,
+    # localize_sample_sh,
+    localize_sample_sh_new,
     # localize_sample_panako_sh,
     # localize_sample_panako_h,
 ]
@@ -186,6 +186,6 @@ if __name__ == "__main__":
 
     for method in METHODS:
         evaluation_main(
-            evaluation_method=evaluate,
+            evaluation_method=evaluate_reduced_search_space,
             localization_method=method,
         )
