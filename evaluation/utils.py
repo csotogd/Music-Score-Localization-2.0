@@ -119,6 +119,10 @@ def evaluate_reduced_search_space(
 
         predictions, _ = localization_method(constellation_record, const_ref_subset)
 
+        print("Constref: " + str(const_ref_subset[0][0]))
+        print("Constref end: " + str(const_ref_subset[-1][0]))
+        print("Prediction:" + str(predictions))
+
         ##TODO perform the itteration of the montecarlo
         # mc.iterate(length_ref=30, time_diff_snippets=1, predictions=predictions) #check the time diff snippets, filled with a random value
         # prediction = mc.get_most_likely_point(length_intervals=2, offset_intervals=0.2)
@@ -279,12 +283,10 @@ def evaluate_localization(
         else:
             scores.append(0)
 
-    # print()
-    # print("True Label: ", true_label)
-    # for i in range(len(predictions)):
-    #     print(predictions[i], scores[i])
-    # print()
-
+    print("True Label: ", true_label)
+    for i in range(len(predictions)):
+        print(predictions[i], scores[i])
+    print()
     return max(scores)
 
 
