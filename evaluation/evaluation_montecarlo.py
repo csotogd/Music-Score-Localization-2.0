@@ -159,6 +159,7 @@ def evaluate_mc(
     fs_record,
     recording_labels,
     length_snippet_secs=3,
+
 ):
     """
     This functions evaluates how good our matching algorithm is, but it is assumed that we can reduce the search space, i.e only take a fraction
@@ -187,7 +188,7 @@ def evaluate_mc(
 
     # calculate constellation map for each
     constellation_ref = sp_pipeline(raw_ref, fs_ref, denoise=False)
-    mc_localizer = montecarlo_robot_localization(nr_particles = 3000, length_ref_initial_subset= 30)
+    mc_localizer = montecarlo_robot_localization(nr_particles = 3000, length_ref_initial_subset= 30, length_entire_ref=len(raw_ref)/fs_ref)
 
 
     score = 0
