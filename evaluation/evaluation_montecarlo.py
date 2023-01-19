@@ -4,6 +4,8 @@ import sys
 import os
 import time
 
+import numpy as np
+
 from localization.montecarlo_robot.montecarlo import montecarlo_robot_localization
 from localization.panako_sh.get_mc_scores_panako_sh import get_mc_scores_panako_sh
 
@@ -42,7 +44,7 @@ path1_rec = "../data/claire_de_lune_record1_kris_1channel.wav"
 #path3_rec = ("../data/bach_prelude_c_major/mic/BAch_prelude_Background_plus_mistake_1_channel.wav")
 
 # paths to labeled data of songs
-path1_labels = "../data/claire_de_lune_record1_kris.txt"
+path1_labels = "../data/extensive_labelled_data/claire_de_lune_record1_kris.txt"
 #path1_labels = ("../data/labelled_data/Bach_prelude_first_version_1channel.txt")
 #path2_labels = "../data/labelled_data/Bach_prelude_second_version_1channel.txt"
 #path3_labels = ("../data/labelled_data/BAch_prelude_Background_plus_mistake_1_channel.txt")
@@ -149,7 +151,7 @@ def evaluation_main(evaluation_method, localization_method):
 
 
 
-def evaluate_reduced_search_space_mc(
+def evaluate_mc(
     localization_method,
     raw_ref,
     fs_ref,
@@ -185,16 +187,18 @@ def evaluate_reduced_search_space_mc(
 
     # calculate constellation map for each
     constellation_ref = sp_pipeline(raw_ref, fs_ref, denoise=False)
-    mc_localizer = montecarlo_robot_localization(nr_particles = 2000, length_ref_initial_subset= 30)
+    mc_localizer = montecarlo_robot_localization(nr_particles = 3000, length_ref_initial_subset= 30)
+
 
     score = 0
     for time_recording, true_label in recording_labels:
-
+        print('time recording: ', time_recording )
         previous_time= current_time
         current_time= time_recording
         time_elapsed= current_time - previous_time
 
         # get subset of the constellation map
+        """
         const_ref_subset = get_fraction_of_ref_song(
             ref_song_cons_map=constellation_ref,
             fs_ref=fs_ref,
@@ -202,6 +206,7 @@ def evaluate_reduced_search_space_mc(
             length_seconds_ref_song=len(raw_ref) / fs_ref,
             length_subset=length_ref_subset,
         )
+        """
 
         # get an interval of the song around the point in the recording
         recording_interval = get_song_interval(
@@ -209,13 +214,15 @@ def evaluate_reduced_search_space_mc(
         )
         constellation_record = sp_pipeline(recording_interval, fs_record, denoise=True)
 
-        predictions =get_mc_scores_panako_sh(sample_constellation_map= constellation_record, song_constellation_map= const_ref_subset, ref_freq=fs_ref)
+        predictions =get_mc_scores_panako_sh(sample_constellation_map= constellation_record, song_constellation_map= constellation_ref, ref_freq=fs_ref)
 
         ##perform the iteration of the montecarlo
         mc_localizer.iterate(length_ref=30, time_diff_snippets=time_elapsed, predictions=predictions) #check the time diff snippets, filled with a random value
         prediction = mc_localizer.get_most_likely_point(length_intervals=2, offset_intervals=0.2)
 
-        score_point = evaluate_localization(true_label, predictions)
+        score_point = evaluate_localization(true_label, np.array([prediction]))
+        print('score point: ', score_point)
+        print()
         score += score_point
 
     score_normalized = score / len(recording_labels)
@@ -225,7 +232,9 @@ def evaluate_reduced_search_space_mc(
 
 
 if __name__ == "__main__":
-    evaluation_main(
-        evaluation_method=evaluate_reduced_search_space_mc,
+    score = evaluation_main(
+        evaluation_method=evaluate_mc,
         localization_method=localize_sample_sh,
     )
+
+    print('score: ', score)

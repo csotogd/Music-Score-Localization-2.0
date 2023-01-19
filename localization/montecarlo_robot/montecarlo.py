@@ -159,7 +159,7 @@ class montecarlo_robot_localization:
         weights_M_k = self.__generate_weights_M_k(S_prime_k, predictions)
         return self.__generate_new_set_of_particles_update_phase(weights_M_k)
 
-    def __generate_prob_xk_of_prediction_phase(self, particle, length_ref, length_side=1, step_size=0.1):
+    def __generate_prob_xk_of_prediction_phase(self, particle, length_ref, length_side=3, step_size=0.1):
         """
         Here we are calculating the probability of being in a certain point knowing the resulting set of particles in the previous phase and
         not knowing the input at time k. This is the probability distribution that is calculated under the prediction phase of the paper.
