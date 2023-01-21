@@ -7,22 +7,7 @@ TIME_AHEAD = 5
 RANGES = np.array((2, 2, 1))
 
 
-def create_tuples(constellation_map: list):
-    """
-    A function that creates an array containing the tuples
-    representing the diagonals in the constellation map.
-    The tuples are in the form (freq_0, freq_1, td) where:
-        - freq_0 is a frequency encountered at time t_0;
-        - freq_1 is a frequency encountered at time t_1 > t_0;
-        - td = t_1 - t_0.
-
-    The function returns:
-        - A numpy array containing the tuples as its rows;
-        - A dictionary in which each each index in the numpy
-        array is associated with the t_0 for the corresponding
-        tuple found at that index in the array.
-    """
-
+def create_tuples_array(constellation_map: list):
     index_dict = {}
     tuples_list = []
 
@@ -39,7 +24,7 @@ def create_tuples(constellation_map: list):
     return np.asarray(tuples_list), index_dict
 
 
-def match(sample_tuples_array: np.ndarray, song_tuples_array: np.ndarray):
+def best_matches_d(sample_tuples_array: np.ndarray, song_tuples_array: np.ndarray):
     """
     A function which compares the sample tuple array with the song
     tuple array by sliding the first over the second and counting

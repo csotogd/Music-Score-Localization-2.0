@@ -5,22 +5,16 @@ import os
 sys.path.append(os.getcwd())
 
 # Import methods for testing
-from localization.direct_comparison.localize_sample_d import localize_sample_d
-from localization.hashing.localize_sample_h import localize_sample_h
-from localization.sliding_hashes.localize_sample_sh import localize_sample_sh
-from localization.sliding_hashes_new.localize_sample_sh_new import (
-    localize_sample_sh_new,
-)
-from localization.panako_sh.localize_sample_panako_sh import localize_sample_panako_sh
-from localization.panako_h.localize_sample_panako_h import localize_sample_panako_h
+from localization import *
 
 METHODS = [
     localize_sample_d,
-    localize_sample_h,
-    localize_sample_sh,
-    localize_sample_sh_new,
-    localize_sample_panako_sh,
-    localize_sample_panako_h,
+    localize_sample_h_shazam,
+    localize_sample_h_panako,
+    localize_sample_sw1_shazam,
+    localize_sample_sw1_panako,
+    localize_sample_sw2_shazam,
+    localize_sample_sw2_panako,
 ]
 
 # Import constellation generator
@@ -32,7 +26,7 @@ import time
 # Constants for random testing
 SONG_LENGTH = 10_000  # 132_300  # 220_500, 441_000
 SAMPLE_LENGTH = 100  # 2004  # 35, 125, 501, 2004, 3371
-NOISE_VAR = 3
+NOISE_VAR = 50
 ERROR_MARGIN = 2
 
 
@@ -82,4 +76,4 @@ def random_test(method):
 
 
 if __name__ == "__main__":
-    random_test(method=localize_sample_sh_new)
+    random_test(method=localize_sample_sw1_shazam)
