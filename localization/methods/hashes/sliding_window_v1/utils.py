@@ -7,7 +7,7 @@ from localization.methods.hashes.create_hash import (
 IDX_AHEAD = 10
 
 
-def create_hashes_array_shazam(constellation_map):
+def create_hashes_array_sw1_shazam(constellation_map):
 
     index_dict = {}
     hashes_list = []
@@ -24,7 +24,7 @@ def create_hashes_array_shazam(constellation_map):
     return np.asarray(hashes_list), index_dict
 
 
-def create_hashes_array_panako(constellation_map):
+def create_hashes_array_sw1_panako(constellation_map):
 
     index_dict = {}
     hashes_list = []

@@ -7,7 +7,7 @@ TIME_AHEAD = 5
 RANGES = np.array((2, 2, 1))
 
 
-def create_tuples_array(constellation_map: list):
+def create_diag_array(constellation_map: list):
     index_dict = {}
     tuples_list = []
 

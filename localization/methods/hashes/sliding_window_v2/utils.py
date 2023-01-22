@@ -6,7 +6,7 @@ from localization.methods.hashes.create_hash import (
 IDX_AHEAD = 10
 
 
-def create_hashes_dict_shazam(constellation_map):
+def create_hashes_dict_sw2_shazam(constellation_map):
     hashes = {}
     for i, (t_0, freq_0) in enumerate(constellation_map):
         if t_0 not in hashes:
@@ -19,7 +19,7 @@ def create_hashes_dict_shazam(constellation_map):
     return hashes
 
 
-def create_hashes_dict_panako(constellation_map):
+def create_hashes_dict_sw2_panako(constellation_map):
     hashes = {}
     for i, (t_0, freq_0) in enumerate(constellation_map):
         if t_0 not in hashes:
