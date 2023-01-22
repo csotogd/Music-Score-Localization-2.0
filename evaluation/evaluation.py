@@ -312,8 +312,6 @@ if __name__ == "__main__":
             mode=match_mode,
         )
 
-    # TODO: Ask Sree why eval_reduced_search_space gives a score array that
-    #  is longer than the number of snippets a song has
     draw_time_series_graphs(match_mode)
 
     write_csv_files(match_mode)
