@@ -6,39 +6,38 @@ import time
 
 import numpy as np
 
+from localization.methods.hashes.hashing.localize_sample_h import localize_sample_h
 from localization.montecarlo_robot.montecarlo import montecarlo_robot_localization
-from localization.panako_sh.get_mc_scores_panako_sh import get_mc_scores_panako_sh
+from localization.montecarlo_robot.monte_carlo_score import monte_carlo_score_panako
+from localization.montecarlo_robot.monte_carlo_score import monte_carlo_score_shazam
 
 sys.path.append(os.getcwd())
 
 from Utilities.pipelines import *
 from scipy.io.wavfile import read
 
-from utils import *
+from utils_eval import *
 
 # Import methods for testing
-from localization.direct_comparison.localize_sample_d import localize_sample_d
-from localization.hashing.localize_sample_h import localize_sample_h
-from localization.sliding_hashes.localize_sample_sh import localize_sample_sh
-from localization.panako_sh.localize_sample_panako_sh import localize_sample_panako_sh
-from localization.panako_h.localize_sample_panako_h import localize_sample_panako_h
+from localization.methods import *
 
 METHODS = [
-    localize_sample_d,
-    localize_sample_h,
-    localize_sample_sh,
-    localize_sample_panako_sh,
-    localize_sample_panako_h,
+    # localize_sample_d,
+    localize_sample_h_shazam,
+    localize_sample_h_panako,
+    localize_sample_sw1_shazam,
+    localize_sample_sw1_panako,
+    localize_sample_sw2_shazam,
+    localize_sample_sw2_panako,
 ]
 
-
 Fs_ref, ref_song = read(
-    "../data/Clair_de_lune_original_1channel.wav"
+    "../data/reference_wave_files/Clair_de_lune_original_1channel.wav"
     #"../data/bach_prelude_c_major/Bach_prelude_original_1channel.wav"
 )
 
 # paths to songs we will compare
-path1_rec = "../data/claire_de_lune_record1_kris_1channel.wav"
+path1_rec = "../data/recorded_wave_files/claire_de_lune_record1_kris_1channel.wav"
 #path1_rec = ("../data/bach_prelude_c_major/mic/Bach_prelude_first_version_1channel.wav")
 #path2_rec = ("../data/bach_prelude_c_major/mic/Bach_prelude_second_version_1channel.wav")
 #path3_rec = ("../data/bach_prelude_c_major/mic/BAch_prelude_Background_plus_mistake_1_channel.wav")
@@ -58,12 +57,11 @@ paths = [
 length_snippets_in_secs = [3]
 
 
-def evaluation_main(evaluation_method, localization_method):
+def evaluation_main(evaluation_method):
     # now we evaluate all songs
     start_time = time.time()
     print()
     print(f"Evaluation method: {evaluation_method.__name__}")
-    print(f"Localization method: {localization_method.__name__}")
     print()
     scores = []
     for path_rec, path_labels in paths:
@@ -74,7 +72,6 @@ def evaluation_main(evaluation_method, localization_method):
         for length_snippet in length_snippets_in_secs:
 
             score = evaluation_method(
-                localization_method=localization_method,
                 raw_ref=ref_song,
                 fs_ref=Fs_ref,
                 raw_recording=record_song,
@@ -118,7 +115,6 @@ def evaluation_main(evaluation_method, localization_method):
         # for each song try different lengths of snippets:
         for length_snippet in length_snippets_in_secs:
             score = evaluation_method(
-                localization_method=localization_method,
                 raw_ref=ref_song,
                 fs_ref=Fs_ref,
                 raw_recording=ref_song,
@@ -152,7 +148,7 @@ def evaluation_main(evaluation_method, localization_method):
 
 
 def evaluate_mc(
-    localization_method,
+
     raw_ref,
     fs_ref,
     raw_recording,
@@ -215,7 +211,7 @@ def evaluate_mc(
         )
         constellation_record = sp_pipeline(recording_interval, fs_record, denoise=True)
 
-        predictions =get_mc_scores_panako_sh(sample_constellation_map= constellation_record, song_constellation_map= constellation_ref, ref_freq=fs_ref)
+        predictions =monte_carlo_score_panako(sample_constellation_map= constellation_record, song_constellation_map= constellation_ref)
 
         ##perform the iteration of the montecarlo
         mc_localizer.iterate(length_ref=30, time_diff_snippets=time_elapsed, predictions=predictions) #check the time diff snippets, filled with a random value
@@ -234,8 +230,7 @@ def evaluate_mc(
 
 if __name__ == "__main__":
     score = evaluation_main(
-        evaluation_method=evaluate_mc,
-        localization_method=localize_sample_sh,
+        evaluation_method=evaluate_mc
     )
 
     print('score: ', score)

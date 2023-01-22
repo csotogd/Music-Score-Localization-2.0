@@ -18,7 +18,10 @@ def random_constellations(song_length, sample_length, noise_var):
     origin = extracted_sample[0][0]
     for t, freq in extracted_sample:
         sample_constellation_map.append(
-            (t - origin, round(freq + random.gauss(0, noise_var)))
+            (
+                t - origin,
+                round(freq + random.gauss(0, noise_var)),
+            )
         )
 
     return song_constellation_map, sample_constellation_map, idx, origin

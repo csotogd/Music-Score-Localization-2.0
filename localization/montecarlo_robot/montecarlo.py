@@ -23,7 +23,6 @@ class montecarlo_robot_localization:
         length_ref: length of the subset/whole reference song used in this iteration
         time_diff_snippets: time differnece between this snippet and the previous one
         predictions: interpretations of current measurements used to adjust the weights for particles
-
         """
         S_prime_k= self.__prediction_phase(S_k_minus_1=self.set_of_particles, length_ref=length_ref, time_diff_snippets= time_diff_snippets)
         self.set_of_particles= self.__update_phase(S_prime_k, predictions)
@@ -34,10 +33,7 @@ class montecarlo_robot_localization:
         """
         Computes the most likely point in time of the reference song the musician is in given the current set of particles.
         This is done by using a sliding interval approach.
-
-
         offset_intervals: referes to how much we move the sliding interval each time.
-
         Returns
         -------
         the time point in time which is more likely to happen
@@ -106,7 +102,6 @@ class montecarlo_robot_localization:
         nr_particles int
         length_ref_subset int. This is in seconds. Either the length of the refernece song (if we are to compute it fully) or the size of the
                                 subset we are going to consider
-
         Returns
         -------
         a 1d np array of time points in seconds.
@@ -124,11 +119,9 @@ class montecarlo_robot_localization:
         S_k_minus_1: 1d np array containing the particles (times in seconds) as floats
         length_ref: length of reference song/subset in seconds
         time_diff_snippets: float, time difference in seconds that elpases between consecutive calls to the prediction phase method, offset between snippets to localize
-
         Returns
         a new np array of the same shape and type as the one given as input
         -------
-
         """
         S_prime_k=np.zeros(shape=S_k_minus_1.shape, dtype=float)
         #first we need to add the time difference between the previous observation (song snippet) and the current one.
@@ -146,7 +139,6 @@ class montecarlo_robot_localization:
         """
         Update Phase of the monte carlo approach, updates the weights according to new sensor measurements and generates
          a new set of particles
-
         Parameters
         ----------
         S_prime_k: set of particles calculated in prediction phase. 2d np array of floats
@@ -164,12 +156,10 @@ class montecarlo_robot_localization:
         """
         Here we are calculating the probability of being in a certain point knowing the resulting set of particles in the previous phase and
         not knowing the input at time k. This is the probability distribution that is calculated under the prediction phase of the paper.
-
        In order to calculate the probability, we do the following:
         Each particle '*' has an interval [a, b] centered around it. If an estimation position lands within the interval
         it receives a score relative to it's proximity to '*'. The score linearly decreases from the particle to the
         interval endpoints a and b. Every other point still gets a non score. An illustration is provided below:
-
               |                    *
         score |                   / \
               |                  /   \
@@ -177,14 +167,10 @@ class montecarlo_robot_localization:
               | ---------------        -----------------
               |_____________________________________
                    time        a        b
-
         Anything between a and b would get a score
-
-
         So the proccess works as follows:
         1.- We take steps of step_size seconds. For each step we calculate a score for that position as explained above.
         2.- We sum the scores of each position and we normalize. This way we get a probability distribution between 0 and 1
-
         Parameters
         ----------
         particle: a time point in seconds (float)
@@ -192,7 +178,6 @@ class montecarlo_robot_localization:
         length_ref: length of reference song in seconds.
         step_size: float step size in seconds. We will generate the probability of selecting timepoints every step_size seconds
         fake_score: float which represents the probability to all those points that are different
-
         Returns
         -------
         A np array of dimensions [nr_steps in the entire song, where for each entry i,
@@ -227,14 +212,12 @@ class montecarlo_robot_localization:
     def __generate_new_particle_prediction_phase(self, probs_x):
         """
         Generates a new particle knowing the probabilities of x given a particle and the previous input. This is part of the prediction phase
-
         Parameters
         ----------
         probs_x: conditional probability of having a particle at state x calculated previously in this prediciton phase
                 A np array of dimensions [length_entire_song/step_size ,2], where for each entry i,
                 the first element [i][0] is a time point and the second element is the probability of selecting that time point.
                 If the probability for a value is 0 there will be no entry for it
-
         Returns
         -------
         a new particle (float), which represents a time point.
@@ -259,13 +242,11 @@ class montecarlo_robot_localization:
             1. Use panako/hashing sliding window, to obtain a score for all the times in the song.
             2. Get the score given by 1 at the time of the particle, that would be the weight
             3. normalize all weights to add up to one
-
         Parameters
         ----------
         S_prime_k: set of particles calculated in prediction phase. 2d np array of floats
         predictions: predicted positions from new sensor measurements
         fake_weight: float that represents the score that we will give to points where the matching algorithm finds no matching
-
         Returns
         -------
         np array of floats of dimensions (N,2), where N represents the number of particles.
@@ -290,10 +271,8 @@ class montecarlo_robot_localization:
     def __get_localization_score(self, particle, predictions, length_center =0.5, length_side=0.25, fake_score=0.1):
         """
         Outputs a localisation score for each particle.
-
         Score is 1*score in predictions in an interval of length length center where the is one prediction in the center.
         Then it gets a score of 0.5* score in predictions if it is within 0.5 and 0.25s to the center of the inteval.
-
         Parameters
         ----------
         particle: particle object containing a time and weight
@@ -324,7 +303,6 @@ class montecarlo_robot_localization:
         """
         Outputs a localisation score for each particle. Tolerance around the prediction value for which a 1 is still
         returned as the weight for the particle. Example shown below
-
                     ____tol____|___tol____
                     |                     |
         score       |                     |
@@ -332,15 +310,12 @@ class montecarlo_robot_localization:
          ___________|          /\         |_______________
                                |
                             prediction
-
                           <-time->
-
         Parameters
         ----------
         particle: particle object containing a time and weight
         predictions: predicted positions from new sensor measurements
         tolerance: the tolerance to either side of the prediction for which a value of 1 is returned
-
         Returns
         -------
         a score between 1 and 0.
@@ -357,19 +332,16 @@ class montecarlo_robot_localization:
     def __get_weighted_localization_score(self, particle, predictions, future_decay = 1):
         """
         Decayed weight of the particles time instance to predicted points
-
                      /\
                    /   \
                a /      \  b  ---- exponential rise (with rate a) and decay (with rate b). future_decay = b/a
                /         \
         ______/           \______________________
-
         Parameters
         ----------
         particle: particle object containing a time and weight
         predictions: predicted positions from new sensor measurements
         future_decay: decay factor of future predictions to past predictions
-
         Returns
         -------
         weight as sum of the decayed weights from all predictions to the particle time.
@@ -384,13 +356,11 @@ class montecarlo_robot_localization:
         """
         Generates a new set of particles, of the same length as the previous one, where the sampling is weighted
         according to the weights previously calculated in the update phase
-
         Parameters
         ----------
         weights_M_k: np array of floats of dimensions (N,2), where N represents the number of particles.
         [i,0] accesses the weight of particle i . the weight is a valid probability (they all sum up to one)
         [i,1] accesses the time of particle 1
-
         Returns
         -------
         1d float np array. New set of particles, where each entry in the np array represents the times of the particles.
@@ -449,7 +419,6 @@ if __name__ == '__main__':
     set_of_particles = np.array([0, 2, 2.5, 3.4, 5.9,6.7, 8.7, 8.9, 9, 9.6])
     mc = montecarlo_robot_localization(nr_particles=10, length_ref_initial_subset=10)
     mc.set_of_particles= set_of_particles
-
     most_likely_time = mc.get_most_likely_point(length_intervals=2, offset_intervals=0.1)
     print(most_likely_time)
     """
@@ -478,6 +447,3 @@ if __name__ == '__main__':
         mc.get_most_likely_point()
         print("mean of particles: ", mc.set_of_particles.mean())
         print("std of particles: ", mc.set_of_particles.std())
-
-
-
