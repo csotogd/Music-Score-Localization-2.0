@@ -101,6 +101,7 @@ def evaluate_reduced_search_space(
     # mc = MC.montecarlo_robot_localization(nr_particles=50, length_ref_initial_subset=30)
 
     score = 0
+    scores = []
     for time_recording, true_label in recording_labels:
         # get subset of the constellation map
         const_ref_subset = get_fraction_of_ref_song(
@@ -129,10 +130,11 @@ def evaluate_reduced_search_space(
         # score_point = evaluate_localization_single(true_label, prediction)
 
         score_point = evaluate_localization(true_label, predictions)
+        scores.append(round(score_point, 2))
         score += score_point
 
     score_normalized = score / len(recording_labels)
-    return score_normalized
+    return score_normalized, scores
 
 
 def get_fraction_of_ref_song(
