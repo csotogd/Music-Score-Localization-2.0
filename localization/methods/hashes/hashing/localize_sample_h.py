@@ -1,4 +1,4 @@
-from localization.methods.hashes.hashing.utils import *
+from localization.methods.hashes.hashing.utils_h import *
 import time
 
 

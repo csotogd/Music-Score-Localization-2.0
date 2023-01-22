@@ -1,4 +1,4 @@
-from localization.methods.hashes.sliding_window_v1.utils import *
+from localization.methods.hashes.sliding_window_v1.utils_sw1 import *
 import time
 
 

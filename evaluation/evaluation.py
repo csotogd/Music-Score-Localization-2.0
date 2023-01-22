@@ -8,7 +8,7 @@ sys.path.append(os.getcwd())
 
 from scipy.io.wavfile import read
 
-from utils import *
+from utils_eval import *
 
 # Import methods for testing
 from localization.methods import *

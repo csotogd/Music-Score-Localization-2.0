@@ -1,4 +1,4 @@
-from localization.methods.diagonals.utils import *
+from localization.methods.diagonals.utils_d import *
 import time
 
 
