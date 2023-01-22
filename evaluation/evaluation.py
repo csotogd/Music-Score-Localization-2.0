@@ -35,9 +35,9 @@ All paths and their respective:
 
 ALL_PATHS = [
     (
-        "../data/Clair_de_lune_original_1channel.wav",
-        "../data/claire_de_lune_record1_kris_1channel.wav",
-        "../data/labelled_data/claire_de_lune_record1_kris.txt",
+        "./data/reference_wave_files/Clair_de_lune_original_1channel.wav",
+        "./data/recorded_wave_files/claire_de_lune_record1_kris_1channel.wav",
+        "./data/labelled_data/claire_de_lune_record1_kris.txt",
     )
     # ,
     # ("../data/bach_prelude_c_major/Bach_prelude_original_1channel.wav",
