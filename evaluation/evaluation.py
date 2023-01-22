@@ -39,23 +39,47 @@ ALL_PATHS = [
         "../data/recorded_wave_files/claire_de_lune_record1_kris_1channel.wav",
         "../data/labelled_data/claire_de_lune_record1_kris.txt",
     )
-    # ,
-    # ("../data/bach_prelude_c_major/Bach_prelude_original_1channel.wav",
-    #  "../data/bach_prelude_c_major/mic/BAch_prelude_Background_plus_mistake_1_channel.wav",
-    #  "../data/labelled_data/BAch_prelude_Background_plus_mistake_1_channel.txt"
-    #  )
-    #  ,
-    #
-    # ("../data/bach_prelude_c_major/Bach_prelude_original_1channel.wav",
-    #  "../data/bach_prelude_c_major/mic/Bach_prelude_first_version_1channel.wav",
-    #  "../data/labelled_data/Bach_prelude_first_version_1channel.txt"
-    #  )
-    #  ,
-    #
-    # ("../data/bach_prelude_c_major/Bach_prelude_original_1channel.wav",
-    #  "../data/bach_prelude_c_major/mic/Bach_prelude_second_version_1channel.wav",
-    #  "../data/labelled_data/Bach_prelude_second_version_1channel.txt"
-    #  )
+    ,
+    (
+        "../data/reference_wave_files/Bach_prelude_original_1channel.wav",
+        "../data/recorded_wave_files/BAch_prelude_Background_plus_mistake_1_channel.wav",
+        "../data/labelled_data/BAch_prelude_Background_plus_mistake_1_channel.txt"
+     )
+    ,
+
+    (
+        "../data/reference_wave_files/Bach_prelude_original_1channel.wav",
+        "../data/recorded_wave_files/Bach_prelude_first_version_1channel.wav",
+        "../data/labelled_data/Bach_prelude_first_version_1channel.txt"
+     )
+    ,
+
+    (
+        "../data/reference_wave_files/Bach_prelude_original_1channel.wav",
+        "../data/recorded_wave_files/Bach_prelude_second_version_1channel.wav",
+        "../data/labelled_data/Bach_prelude_second_version_1channel.txt"
+     )
+    ,
+
+    (
+        "../data/reference_wave_files/The_ballad_of_john_and_yoko_BASS_1_channel.wav",
+        "../data/recorded_wave_files/The_Ballad_Of_John_And_Yoko_bass_diyon.wav",
+        "../data/labelled_data/The_ballad_of_john_and_yoko_bass.txt"
+     )
+    ,
+
+    (
+        "../data/reference_wave_files/The_ballad_of_john_and_yoko_BASS_1_channel.wav",
+        "../data/recorded_wave_files/The_Ballad_Of_John_And_Yoko_piano_diyon_mistakes.wav",
+        "../data/labelled_data/The_ballad_of_john_and_yoko_piano_mistakes.txt"
+     )
+    ,
+
+    (
+        "../data/reference_wave_files/The_ballad_of_john_and_yoko_BASS_1_channel.wav",
+        "../data/recorded_wave_files/The_Ballad_Of_John_And_Yoko_piano_diyon_take2.wav",
+        "../data/labelled_data/The_ballad_of_john_and_yoko_piano_take2.txt"
+     )
 ]
 
 SNIPPET_LENGTHS = [3, 5, 10]
@@ -227,7 +251,7 @@ def evaluation_main(evaluation_method, localization_method, mode):
             key = f"{str(length_snippet)}s_{song_name}"
             GRAPH_DICT[key].append(
                 [
-                    localization_method.__name__,
+                    localization_method.__name__.replace("localize_sample_", ""),
                     time_steps,
                     score_array,
                 ]
@@ -238,8 +262,8 @@ def evaluation_main(evaluation_method, localization_method, mode):
 
         csv_row = []
         for i in range(len(scores)):
-            csv_row.append(scores[i])
-            csv_row.append(times[i])
+            csv_row.append(round(scores[i], 2))
+            csv_row.append(round(times[i], 2))
         song_name = path_rec.split("/")[-1].replace(".wav", "").replace("_", "")
         CSV_DICT[localization_method.__name__.replace("localize_sample_", "")][
             song_name
