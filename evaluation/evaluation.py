@@ -23,8 +23,8 @@ METHODS = [
     localize_sample_sw2_panako,
 ]
 
-GRAPH_FOLDER = "./data/graphs/"
-CSV_FOLDER = "./data/csv_files/"
+GRAPH_FOLDER = "../data/graphs/"
+CSV_FOLDER = "../data/csv_files/"
 
 """
 All paths and their respective:
@@ -35,9 +35,9 @@ All paths and their respective:
 
 ALL_PATHS = [
     (
-        "./data/reference_wave_files/Clair_de_lune_original_1channel.wav",
-        "./data/recorded_wave_files/claire_de_lune_record1_kris_1channel.wav",
-        "./data/labelled_data/claire_de_lune_record1_kris.txt",
+        "../data/reference_wave_files/Clair_de_lune_original_1channel.wav",
+        "../data/recorded_wave_files/claire_de_lune_record1_kris_1channel.wav",
+        "../data/labelled_data/claire_de_lune_record1_kris.txt",
     )
     # ,
     # ("../data/bach_prelude_c_major/Bach_prelude_original_1channel.wav",
@@ -221,16 +221,15 @@ def evaluation_main(evaluation_method, localization_method, mode):
             times.append(end_time - start_time)
             print("done with snippets of length: ", length_snippet)
 
-            time_steps = [
-                x for x in range(0, int(labelled_data[-1][0]), length_snippet)
-            ]
+            time_steps = [x[0] for x in labelled_data]
+
             song_name = path_rec.split("/")[-1].replace(".wav", "").replace("_", "")
             key = f"{str(length_snippet)}s_{song_name}"
             GRAPH_DICT[key].append(
                 [
                     localization_method.__name__,
                     time_steps,
-                    score_array[: len(time_steps)],
+                    score_array,
                 ]
             )
 
@@ -285,7 +284,7 @@ CSV_DICT = {}
 
 if __name__ == "__main__":
 
-    match_mode = "reference vs reference"
+    match_mode = "recording vs reference"
 
     # Populate graph dictionary
     for _, path_recording, _ in ALL_PATHS:
