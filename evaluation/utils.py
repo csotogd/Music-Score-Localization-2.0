@@ -56,7 +56,9 @@ def evaluate(
         )
         constellation_record = sp_pipeline(recording_interval, fs_record, denoise=True)
 
-        predictions, _ = localization_method(constellation_record, constellation_ref)
+        predictions, _ = localization_method(
+            constellation_record, constellation_ref, print_times=False
+        )
 
         score_point = evaluate_localization(true_label, predictions)
         score += score_point
@@ -118,7 +120,9 @@ def evaluate_reduced_search_space(
         )
         constellation_record = sp_pipeline(recording_interval, fs_record, denoise=True)
 
-        predictions, _ = localization_method(constellation_record, const_ref_subset)
+        predictions, _ = localization_method(
+            constellation_record, const_ref_subset, print_times=False
+        )
 
         # print("Constref: " + str(const_ref_subset[0][0]))
         # print("Constref end: " + str(const_ref_subset[-1][0]))

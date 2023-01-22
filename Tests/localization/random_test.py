@@ -5,7 +5,7 @@ import os
 sys.path.append(os.getcwd())
 
 # Import methods for testing
-from localization import *
+from localization.methods import *
 
 METHODS = [
     localize_sample_d,
@@ -54,7 +54,7 @@ def random_test(method):
 
     start = time.time()
     matching_times, matching_score = method(
-        sample_constellation_map, song_constellation_map
+        sample_constellation_map, song_constellation_map, print_times=True
     )
     result = (
         "Success"
@@ -65,15 +65,16 @@ def random_test(method):
         else "Failure"
     )
     end = time.time()
+    print(f"Total calculation time: {end-start}")
+    print()
     print(f"Results (method: {method.__name__})")
     print()
     print(f"Sample origin time: {origin}")
     print(f"Matching times: {matching_times}")
     print(f"Result: {result}")
     print(f"Matching score: {matching_score}")
-    print(f"Total calculation time: {end-start}")
     print()
 
 
 if __name__ == "__main__":
-    random_test(method=localize_sample_sw1_shazam)
+    random_test(method=localize_sample_sw2_shazam)

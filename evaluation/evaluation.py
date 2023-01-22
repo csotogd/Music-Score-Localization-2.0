@@ -11,10 +11,7 @@ from scipy.io.wavfile import read
 from utils import *
 
 # Import methods for testing
-from localization import *
-
-GRAPH_FOLDER = "../data/graphs/"
-CSV_FOLDER = "../data/csv_files/"
+from localization.methods import *
 
 METHODS = [
     # localize_sample_d,
@@ -25,6 +22,9 @@ METHODS = [
     localize_sample_sw2_shazam,
     localize_sample_sw2_panako,
 ]
+
+GRAPH_FOLDER = "./data/graphs/"
+CSV_FOLDER = "./data/csv_files/"
 
 """
 All paths and their respective:
@@ -97,7 +97,9 @@ def write_csv_files(mode: str):
 
     for loc_method in CSV_DICT:
 
-        with open(CSV_FOLDER+sub_folder+loc_method+".csv", "w", newline='') as file:
+        with open(
+            CSV_FOLDER + sub_folder + loc_method + ".csv", "w", newline=""
+        ) as file:
 
             writer = csv.writer(file)
 
@@ -151,7 +153,9 @@ def draw_time_series_graphs(mode: str):
             plt.plot(time_steps, scores, label=label)
 
         split_string = graph_group.split("_")
-        plt.title(f"Localised snippet ({split_string[0]}) scores for {split_string[1]} vs. time")
+        plt.title(
+            f"Localised snippet ({split_string[0]}) scores for {split_string[1]} vs. time"
+        )
         plt.xlabel("Time (seconds)")
         plt.ylabel("Score")
         plt.legend()
@@ -162,7 +166,7 @@ def draw_time_series_graphs(mode: str):
         elif mode == "recording vs reference":
             sub_folder = "rec_vs_ref/"
 
-        file_name = graph_group+".png"
+        file_name = graph_group + ".png"
         plt.savefig(GRAPH_FOLDER + sub_folder + file_name)
 
     print("Done")
@@ -217,10 +221,18 @@ def evaluation_main(evaluation_method, localization_method, mode):
             times.append(end_time - start_time)
             print("done with snippets of length: ", length_snippet)
 
-            time_steps = [x for x in range(0, int(labelled_data[-1][0]), length_snippet)]
+            time_steps = [
+                x for x in range(0, int(labelled_data[-1][0]), length_snippet)
+            ]
             song_name = path_rec.split("/")[-1].replace(".wav", "").replace("_", "")
             key = f"{str(length_snippet)}s_{song_name}"
-            GRAPH_DICT[key].append([localization_method.__name__, time_steps, score_array[:len(time_steps)]])
+            GRAPH_DICT[key].append(
+                [
+                    localization_method.__name__,
+                    time_steps,
+                    score_array[: len(time_steps)],
+                ]
+            )
 
             score_arrays.append(score_array)
             scores.append(score)
@@ -230,14 +242,17 @@ def evaluation_main(evaluation_method, localization_method, mode):
             csv_row.append(scores[i])
             csv_row.append(times[i])
         song_name = path_rec.split("/")[-1].replace(".wav", "").replace("_", "")
-        CSV_DICT[localization_method.__name__.replace("localize_sample_", "")][song_name] = csv_row
+        CSV_DICT[localization_method.__name__.replace("localize_sample_", "")][
+            song_name
+        ] = csv_row
 
         print(f"Done with {path_rec}\n")
         print(f"Total time taken: {sum(times)}\n")
         print(f"----------------EVALUATION RESULTS ({mode}) ---------------------")
         for j in range(len(SNIPPET_LENGTHS)):
             print(
-                f"score for {path_rec} and snippet of {SNIPPET_LENGTHS[j]} seconds --> {scores[j]}. All scores: {score_arrays[j]}")
+                f"score for {path_rec} and snippet of {SNIPPET_LENGTHS[j]} seconds --> {scores[j]}. All scores: {score_arrays[j]}"
+            )
         print("\n")
 
 
@@ -280,7 +295,7 @@ if __name__ == "__main__":
         # Create different snippet lengths for each song
         for snippet_length in SNIPPET_LENGTHS:
 
-            graph_key = str(snippet_length)+f"s_{song}"
+            graph_key = str(snippet_length) + f"s_{song}"
             GRAPH_DICT[graph_key] = []
 
     # Populate csv dictionary

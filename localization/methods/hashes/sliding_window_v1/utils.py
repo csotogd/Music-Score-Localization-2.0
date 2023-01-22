@@ -1,5 +1,8 @@
 import numpy as np
-from localization.hashes.create_hash import create_hash_shazam, create_hash_panako
+from localization.methods.hashes.create_hash import (
+    create_hash_shazam,
+    create_hash_panako,
+)
 
 IDX_AHEAD = 10
 
