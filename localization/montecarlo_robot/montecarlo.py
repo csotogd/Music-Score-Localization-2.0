@@ -129,7 +129,7 @@ class montecarlo_robot_localization:
 
         for i in range(len(S_k_minus_1)):
             particle = S_k_minus_1[i]
-            probs_x= self.__generate_prob_xk_of_prediction_phase(particle, length_ref)
+            probs_x= self.__generate_prob_xk_of_prediction_phase(particle, length_ref, fake_score=1/len(self.set_of_particles)*20)
             new_particle = self.__generate_new_particle_prediction_phase(probs_x)
             S_prime_k[i]=new_particle
 
@@ -149,10 +149,10 @@ class montecarlo_robot_localization:
         [i,0] accesses the weight of particle i
         [i,1] accesses the time of particle 1
         """
-        weights_M_k = self.__generate_weights_M_k(S_prime_k, predictions)
+        weights_M_k = self.__generate_weights_M_k(S_prime_k, predictions, fake_weight=1/len(self.set_of_particles)*20)
         return self.__generate_new_set_of_particles_update_phase(weights_M_k)
 
-    def __generate_prob_xk_of_prediction_phase(self, particle, length_ref, length_side=3, step_size=0.1, fake_score = 0.1):
+    def __generate_prob_xk_of_prediction_phase(self, particle, length_ref, length_side=5, step_size=0.1, fake_score = 0.01):
         """
         Here we are calculating the probability of being in a certain point knowing the resulting set of particles in the previous phase and
         not knowing the input at time k. This is the probability distribution that is calculated under the prediction phase of the paper.
@@ -268,7 +268,7 @@ class montecarlo_robot_localization:
         return weight_list
 
 
-    def __get_localization_score(self, particle, predictions, length_center =0.5, length_side=0.25, fake_score=0.1):
+    def __get_localization_score(self, particle, predictions, length_center =3, length_side=3, fake_score=0.01):
         """
         Outputs a localisation score for each particle.
         Score is 1*score in predictions in an interval of length length center where the is one prediction in the center.
@@ -395,8 +395,6 @@ class montecarlo_robot_localization:
                     idx_cumsum += 1
 
         return new_set_particles
-
-
 
 
 

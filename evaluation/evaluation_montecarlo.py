@@ -6,6 +6,7 @@ import time
 
 import numpy as np
 
+from matplotlib import pyplot as plt
 from localization.methods.hashes.hashing.localize_sample_h import localize_sample_h
 from localization.montecarlo_robot.montecarlo import montecarlo_robot_localization
 from localization.montecarlo_robot.monte_carlo_score import monte_carlo_score_panako
@@ -55,95 +56,6 @@ paths = [
 ]
 
 length_snippets_in_secs = [3]
-
-
-def evaluation_main(evaluation_method):
-    # now we evaluate all songs
-    start_time = time.time()
-    print()
-    print(f"Evaluation method: {evaluation_method.__name__}")
-    print()
-    scores = []
-    for path_rec, path_labels in paths:
-        labelled_data = get_labeled_data(path_labels)
-        Fs_record, record_song = read(path_rec)
-
-        # for each song try different lengths of snippets:
-        for length_snippet in length_snippets_in_secs:
-
-            score = evaluation_method(
-                raw_ref=ref_song,
-                fs_ref=Fs_ref,
-                raw_recording=record_song,
-                fs_record=Fs_record,
-                recording_labels=labelled_data,
-                length_snippet_secs=length_snippet,
-            )
-            print("done with snippets of length: ", length_snippet)
-            scores.append(score)
-        print("done with one version. moving onto the next.")
-    names = ["first version"]#, "second version", "third version"]
-    print()
-    print()
-    print()
-    end_time = time.time()
-    print("Total time taken: ", end_time - start_time)
-    print("----------------EVALUATION RESULTS ---------------------")
-    for i in range(len(names)):
-        for j in range(len(length_snippets_in_secs)):
-            print(
-                "score for ",
-                names[i],
-                " and snippet of ",
-                length_snippets_in_secs[j],
-                " seconds ---->",
-                scores[i * len(length_snippets_in_secs) + j],
-            )
-        print()
-
-    print()
-    print()
-    print()
-    print("----------COMPARING A SONG TO ITSELF--------")
-    scores = []
-    for path_rec, path_labels in paths:
-        labelled_data = get_labeled_data(path_labels)
-        for i in range(len(labelled_data)):
-            labelled_data[i] = (labelled_data[i][1], labelled_data[i][1])
-        Fs_record, record_song = read(path_rec)
-
-        # for each song try different lengths of snippets:
-        for length_snippet in length_snippets_in_secs:
-            score = evaluation_method(
-                raw_ref=ref_song,
-                fs_ref=Fs_ref,
-                raw_recording=ref_song,
-                fs_record=Fs_ref,
-                recording_labels=labelled_data,
-                length_snippet_secs=length_snippet,
-            )
-            print("done with snippets of length: ", length_snippet)
-            scores.append(score)
-        print("done with one version. moving onto the next.")
-    names = ["first version"]#, "second version", "third version"]
-    print()
-    print()
-    print()
-    end_time = time.time()
-    print("Total time taken: ", end_time - start_time)
-    print("----------------EVALUATION RESULTS FOR SONG TO ITSELF---------------------")
-    for i in range(len(names)):
-        for j in range(len(length_snippets_in_secs)):
-            print(
-                "score for ",
-                names[i],
-                " and snippet of ",
-                length_snippets_in_secs[j],
-                " seconds ---->",
-                scores[i * len(length_snippets_in_secs) + j],
-            )
-        print()
-
 
 
 
@@ -217,6 +129,9 @@ def evaluate_mc(
         mc_localizer.iterate(length_ref=30, time_diff_snippets=time_elapsed, predictions=predictions) #check the time diff snippets, filled with a random value
         prediction = mc_localizer.get_most_likely_point(length_intervals=2, offset_intervals=0.2)
 
+        #plot set of particles
+        #plot_hist(set_particles= mc_localizer.set_of_particles, time_recording= time_recording)
+
         score_point = evaluate_localization(true_label, np.array([prediction]))
         print('score point: ', score_point)
         print()
@@ -226,11 +141,40 @@ def evaluate_mc(
     return score_normalized
 
 
+def plot_hist(set_particles, time_recording):
+    plt.hist(np.array(set_particles), 100, density=True,
+             histtype='bar')
 
+    plt.legend(prop={'size': 10})
+
+    plt.title('NR particles per time in seconds------ time recording: '+ str(time_recording))
+
+    plt.show()
 
 if __name__ == "__main__":
-    score = evaluation_main(
-        evaluation_method=evaluate_mc
+    path_ref= "../data/reference_wave_files/Clair_de_lune_original_1channel.wav"
+    path_rec = "../data/recorded_wave_files/claire_de_lune_record1_kris_1channel.wav"
+    path_labels = "../data/extensive_labelled_data/claire_de_lune_record1_kris.txt"
+
+
+    labelled_data = get_labeled_data(path_labels)
+    fs_record, record_song = read(path_rec)
+    fs_ref, ref_song = read(path_ref)
+
+    #comparing a song to itself:
+    for i in range(len(labelled_data)):
+        labelled_data[i] = (labelled_data[i][1], labelled_data[i][1])
+
+    score = evaluate_mc(
+
+            raw_ref= ref_song,
+            fs_ref= fs_ref,
+            raw_recording= record_song,
+            fs_record= fs_record,
+            recording_labels= labelled_data,
+            length_snippet_secs=3,
+
     )
+
 
     print('score: ', score)
