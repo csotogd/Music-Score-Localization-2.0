@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
         # Read the input WAV files, they need to have 1 channel, NOT STEREO
         match_time = 0
-        Fs, ref_song = read("../data/imagine_john_lennon_PIANO_1_channel.wav")
+        Fs, ref_song = read("../data/reference_wave_files/imagine_john_lennon_PIANO_1_channel.wav")
         Parameters_IO.fs = Fs
 
         # Apply the entire signal processing pipeline to the reference song to obtain a constellation map
@@ -34,7 +34,7 @@ if __name__ == "__main__":
         # we either have the song stored because it is a past recording and we need to load it or we
         # will record the sound in real time. This will be controlled by the variable from_mic
         from_mic = False
-        path_to_recording = "../data/imagine_john_lennon_PIANO.wav"
+        path_to_recording = "../data/reference_wave_files/imagine_john_lennon_PIANO.wav"
         # Since we have not recorded Diyon playing piano, we will match the signal with itself
 
         if from_mic:
@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
         else:
             # Read the input WAV files
-            Fs, rec_song = read("../data/imagine_john_lennon_PIANO_1_channel.wav")
+            Fs, rec_song = read("../data/reference_wave_files/imagine_john_lennon_PIANO_1_channel.wav")
 
             # Now I will partition the song into song snippets of a chosen length
             # for each song snippet I will compute its constellation_map
