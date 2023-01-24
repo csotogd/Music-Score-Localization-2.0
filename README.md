@@ -1,4 +1,4 @@
-# Music-Score-Localization-2.0
+# Automatic music sheet page turner
 
 The absence of an automatic page turner that can
 localise a musician performing to the appropriate section of
