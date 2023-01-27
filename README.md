@@ -12,7 +12,7 @@ instead of finding a song in a database of songs. These methods are modified to 
 In order to disambiguate repetitions and take consecutive recordings into considerations, we use a
 method used to localize a mobile robot in a known map. In our case the position of the robot in the map would
 correspond to the time in a song we are in. The strategy chosen is the MonteCarlo localization method, which
-estimates the posterior probability by maintaining and updating a set of particles (possible times).
+estimates the posterior probability of the position given the observations by maintaining and updating a set of particles (possible times).
 
 We test our strategy in our self-built test set. Labelling data was time consuming.
 
